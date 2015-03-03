@@ -78,8 +78,8 @@
     <OutDir>$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\Downloads\curl-7.40.0-win64\curl-7.40.0-win64\include;D:\Programming\Magistrature\explorerdataprovider\x64\Debug;D:\Downloads\rapidjson-master\rapidjson-master\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\Downloads\curl-7.40.0-win64\curl-7.40.0-win64\lib;D:\Programming\Magistrature\explorerdataprovider\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)external\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\external\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>Release\</OutDir>
@@ -150,8 +150,9 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Message>Copy property descriptions to the output directory</Message>
-      <Command>copy ExplorerDataProvider.propdesc $(OutDir)</Command>
+      <Message>Copy property descriptions to the output directory. Copy external dlls to folder with output explorerdataprovider.dll</Message>
+      <Command>copy ExplorerDataProvider.propdesc $(OutDir)
+copy $(ProjectDir)external\dlls $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
