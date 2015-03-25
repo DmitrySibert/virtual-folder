@@ -200,6 +200,7 @@ HRESULT _MapICIVerbToCmdID(LPCMINVOKECOMMANDINFO pici, const ICIVERBTOIDMAP* pma
     return hr;
 }
 
+//¬ыполнение команды происходит вот тут
 HRESULT CFolderViewImplContextMenu::InvokeCommand(LPCMINVOKECOMMANDINFO pici)
 {
     HRESULT hr = E_INVALIDARG;

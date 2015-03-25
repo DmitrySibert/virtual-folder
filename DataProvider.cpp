@@ -24,8 +24,8 @@ int writer(char *data, size_t size, size_t nmemb, string *buffer)
 	return result;
 }
 
-string DataProvider::getFoldersContentJson(const char* path){
-
+string DataProvider::doJsonPost(IJsonSerializable& requestBody)
+{
 	CURL *curl;
 	CURLcode res;
 	string buffer;
@@ -34,26 +34,6 @@ string DataProvider::getFoldersContentJson(const char* path){
 	curl_slist_append(headers, "Content-Type: application/json");
 	curl_slist_append(headers, "charsets: utf-8");
 	curl = curl_easy_init();
-
-	StringBuffer jsonBuffer;
-	Writer<StringBuffer> requestBody(jsonBuffer);
-	requestBody.StartObject();
-	requestBody.String("IsRequest");
-	requestBody.Bool(true);
-	requestBody.String("To");
-	requestBody.StartObject();
-	requestBody.String("Name");
-	requestBody.String("FolderContent");
-	requestBody.EndObject();
-	requestBody.String("Type");
-	requestBody.String("Path");
-	requestBody.String("ID");
-	requestBody.String("c69fb066-c0f4-11e4-8dfc-aa07a5b093db");
-	requestBody.String("Path");
-	requestBody.String(path);
-	requestBody.EndObject();
-	string json = jsonBuffer.GetString();
-
 	if (curl) {
 		//curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
 		//задаем опцию - получить страницу по адресу 
@@ -65,7 +45,7 @@ string DataProvider::getFoldersContentJson(const char* path){
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
 		//указываем куда записывать принимаемые данные
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, requestBody.serialize().c_str());
 		res = curl_easy_perform(curl);
 		/* always cleanup */
 		curl_easy_cleanup(curl);
@@ -74,7 +54,13 @@ string DataProvider::getFoldersContentJson(const char* path){
 	return buffer;
 }
 
-wchar_t* charToWChar(const char* text)
+string DataProvider::getFoldersContentJson(const char* path){
+
+	ContentMessage message(path, true, "FolderContent", "Path", "c69fb066-c0f4-11e4-8dfc-aa07a5b093db");
+	return this->doJsonPost(message);
+}
+
+wchar_t* DataProvider::charToWChar(const char* text)
 {
 	size_t size = strlen(text) + 1;
 	wchar_t* wa = new wchar_t[size];
@@ -101,6 +87,25 @@ list<FolderElement> DataProvider::getFoldersContent(const char* path)
 	}
 	
 	return foldersContent;
+}
+
+void DataProvider::logInfo(const char* info)
+{
+	CURL *curl;
+	CURLcode res;
+	struct curl_slist *headers = NULL; // init to NULL is important 
+	curl_slist_append(headers, "Accept: application/json");
+	curl_slist_append(headers, "Content-Type: application/json");
+	curl_slist_append(headers, "charsets: utf-8");
+	curl = curl_easy_init();
+	LogMessage message(info, true, "Logger", "Log", "43515c7a-a182-4ac4-9d36-6d563b2b0b3c");
+	if (curl) {
+		curl_easy_setopt(curl, CURLOPT_URL, this->url);
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, message.serialize().c_str());
+		res = curl_easy_perform(curl);
+		curl_easy_cleanup(curl);
+	}
 }
 
 DataProvider::~DataProvider()

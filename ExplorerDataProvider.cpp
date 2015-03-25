@@ -21,9 +21,6 @@
 #include "Guid.h"
 #include "fvcommands.h"
 #include "DataProvider.h"
-//#include "CommonWrapperNativeInterface.h"
-//#include <curl/curl.h>
-//#include <string>
 
 const int g_nMaxLevel = 5;
 
@@ -667,6 +664,7 @@ HRESULT CFolderViewImplFolder::GetAttributesOf(UINT cidl, PCUITEMID_CHILD_ARRAY 
                 if (fIsFolder)
                 {
                     dwAttribs |= SFGAO_FOLDER;
+					dwAttribs |= SFGAO_DROPTARGET;
                 }
                 if (nLevel < g_nMaxLevel)
                 {
@@ -686,7 +684,6 @@ HRESULT CFolderViewImplFolder::GetUIObjectOf(HWND hwnd, UINT cidl, PCUITEMID_CHI
 {
     *ppv = NULL;
     HRESULT hr;
-
     if (riid == IID_IContextMenu)
     {
         // The default context menu will call back for IQueryAssociations to determine the
@@ -719,7 +716,13 @@ HRESULT CFolderViewImplFolder::GetUIObjectOf(HWND hwnd, UINT cidl, PCUITEMID_CHI
     else if (riid == IID_IDataObject)
     {
         hr = SHCreateDataObject(m_pidl, cidl, apidl, NULL, riid, ppv);
+		//DataProvider dataProvider;
+		//dataProvider.getFoldersContent("IID_IDataObject");
     }
+	else if (riid == IID_IDropTarget)
+	{
+		bool k = true;
+	}
     else if (riid == IID_IQueryAssociations)
     {
         BOOL fIsFolder = FALSE;

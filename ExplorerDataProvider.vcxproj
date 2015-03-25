@@ -213,22 +213,31 @@ copy $(ProjectDir)external\dlls $(OutDir)</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseMessage.cpp" />
     <ClCompile Include="Category.cpp" />
+    <ClCompile Include="ContentMessage.cpp" />
     <ClCompile Include="ContextMenu.cpp" />
     <ClCompile Include="DataProvider.cpp" />
     <ClCompile Include="Dll.cpp" />
     <ClCompile Include="ExplorerDataProvider.cpp" />
     <ClCompile Include="fvcommands.cpp" />
+    <ClCompile Include="LogMessage.cpp" />
+    <ClCompile Include="OpenFileMessage.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ExplorerDataProvider.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseMessage.h" />
     <ClInclude Include="Category.h" />
+    <ClInclude Include="ContentMessage.h" />
     <ClInclude Include="DataProvider.h" />
     <ClInclude Include="fvcommands.h" />
     <ClInclude Include="Guid.h" />
+    <ClInclude Include="IJsonSerializable.h" />
+    <ClInclude Include="LogMessage.h" />
+    <ClInclude Include="OpenFileMessage.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>

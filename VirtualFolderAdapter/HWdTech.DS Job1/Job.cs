@@ -10,7 +10,8 @@ using System.Collections.Generic;
 
 //{IsRequest:true,ID:'2',To:{Name:'FileStorage'},  Type: "UploadFile", "First": "lkdfgnlfdkngdlkgnfgdnfg"}
 
-[assembly: DIObjectCreationRule("MyJob", typeof(HWdTech.DS_Job1.Job))]
+//[assembly: DIObjectCreationRule("MyJob", typeof(HWdTech.DS_Job1.Job))]
+[assembly: DIObjectCreationRule("Logger", typeof(HWdTech.DS_Job1.LogJob))]
 
 namespace HWdTech.DS_Job1
 {
@@ -30,6 +31,24 @@ namespace HWdTech.DS_Job1
         }
 
         static Field<string> fileName = new Field<string>("FileName");
+    }
+
+    class LogMessage
+    {
+        public static bool IsMeet(IMessage message)
+        {
+            return LogMsg.IsSet(message);
+        }
+
+        public static Field<string> LogMsg
+        {
+            get
+            {
+                return logMsg;
+            }
+        }
+
+        static Field<string> logMsg = new Field<string>("LogMsg");
     }
 
     [Option("myName", "Value")]
@@ -65,6 +84,32 @@ namespace HWdTech.DS_Job1
         {
             Console.WriteLine("CHANNEL 1 type 2");
             MessageBus.TrySendSuccessResponse(message);
+        }
+    }
+
+    [Option("myName", "Value")]
+    [NeedChannel("channel1", IsTyped = true)]
+    [NeedChannel("Logger", IsTyped = true)]
+    public class LogJob : IJob
+    {
+        public LogJob(IObject message)
+        {
+            Console.WriteLine("Instance of Logger has been created." + message);
+        }
+
+        [ChannelEndpointHanlder("Logger", MessageType = "Log")]
+        public void UploadFileHandler(IMessage message)
+        {
+            if (LogMessage.IsMeet(message))
+            {
+                Console.WriteLine("Log message = {0}", LogMessage.LogMsg[message]);
+                Field<string> uniqueId = new Field<string>("UniqueID");
+                MessageBus.TrySendSuccessResponse(message, (m) => { uniqueId[m] = Guid.NewGuid().ToString(); });
+            }
+            else
+            {
+                MessageBus.TrySendUnsuccessResponse(message, "Wrong format of the message");
+            }
         }
     }
 }
