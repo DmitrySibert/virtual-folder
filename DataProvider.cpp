@@ -45,7 +45,8 @@ string DataProvider::doJsonPost(IJsonSerializable& requestBody)
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
 		//указываем куда записывать принимаемые данные
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, requestBody.serialize().c_str());
+		string requestMessageJson = requestBody.serialize();
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, requestMessageJson.c_str());
 		res = curl_easy_perform(curl);
 		/* always cleanup */
 		curl_easy_cleanup(curl);
@@ -106,6 +107,14 @@ void DataProvider::logInfo(const char* info)
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 	}
+}
+
+bool DataProvider::runFile(const char* file)
+{
+	OpenFileMessage message(file, true, "FolderContent", "OpenFile", "c69fb066-c0f4-11e4-8dfc-aa07a5b093db");
+	this->doJsonPost(message);
+
+	return true;
 }
 
 DataProvider::~DataProvider()

@@ -7,6 +7,7 @@ using HWdTech.DS.v30.Messages;
 using HWdTech.DS.v30.PropertyObjects;
 using HWdTech.Factories;
 using System.Collections.Generic;
+using VirtualFolderAdapter.Messages;
 
 //{IsRequest:true,ID:'2',To:{Name:'FileStorage'},  Type: "UploadFile", "First": "lkdfgnlfdkngdlkgnfgdnfg"}
 
@@ -31,24 +32,6 @@ namespace HWdTech.DS_Job1
         }
 
         static Field<string> fileName = new Field<string>("FileName");
-    }
-
-    class LogMessage
-    {
-        public static bool IsMeet(IMessage message)
-        {
-            return LogMsg.IsSet(message);
-        }
-
-        public static Field<string> LogMsg
-        {
-            get
-            {
-                return logMsg;
-            }
-        }
-
-        static Field<string> logMsg = new Field<string>("LogMsg");
     }
 
     [Option("myName", "Value")]

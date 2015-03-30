@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using HWdTech;
 using HWdTech.DS.v30;
 using HWdTech.DS.v30.Channels;
 using HWdTech.DS.v30.Messages;
 using HWdTech.DS.v30.PropertyObjects;
 using HWdTech.Factories;
+using VirtualFolderAdapter.Messages;
 
 [assembly: DIObjectCreationRule("FolderContentJob", typeof(DataAdapter.FolderContent.FolderContentJob))]
 
@@ -21,24 +23,6 @@ namespace DataAdapter.FolderContent
             this.title = title;
         }
     };
-
-    class FolderContentMessage
-    {
-        public static bool IsMeet(IMessage message)
-        {
-            return Path.IsSet(message);
-        }
-
-        public static Field<string> Path
-        {
-            get
-            {
-                return path;
-            }
-        }
-
-        static Field<string> path = new Field<string>("Path");
-    }
 
     [NeedChannel("FolderContent", IsTyped = true)]
     public class FolderContentJob : IJob
@@ -69,6 +53,30 @@ namespace DataAdapter.FolderContent
                     items.Add(folderItem);
                     pathContent[m] = items;
                 });
+            }
+        }
+
+        [ChannelEndpointHanlder("FolderContent", MessageType = "TryOpenFile")]
+        public void tryOpenFile(IMessage message)
+        {
+            if(TryOpenFileMessage.IsMeet(message))
+            {
+                ObjectBuilder builder = Singleton<DIFactory>.Instance.Create<ObjectBuilder>();
+                IMessage message1 = Singleton<DIFactory>.Instance.Create<IMessage>();
+                builder.Message().To(Singleton<DIFactory>.Instance.Create<IChannel>("Cookie")).Make(message1);
+                CookieRequestMessage.Type[message1] = "Parameters";
+                CookieRequestMessage.FileName[message1] = TryOpenFileMessage.FileName[message];
+                MessageBus.Send(message1);
+            }
+        }
+
+        [ChannelEndpointHanlder("FolderContent", MessageType = "OpenFile")]
+        public void runFile(IMessage message)
+        {
+            if (OpenFileMessage.IsMeet(message))
+            {
+                String path = OpenFileMessage.CurrentPath[message] + OpenFileMessage.FileName[message];
+                Process.Start(@path);
             }
         }
     }
