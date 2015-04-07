@@ -1309,17 +1309,24 @@ HRESULT CFolderViewImplEnumIDList::Initialize()
 
 	PIDLIST_ABSOLUTE ppidlCurrentFolder;
 	this->m_pFolder->GetCurFolder(&ppidlCurrentFolder);
-	//PFVITEMID item = (PFVITEMID) ppidlCurrentFolder->mkid.abID;
-	//PCFVITEMID pidmine = (PCFVITEMID)ppidlCurrentFolder;
     HRESULT hr = S_OK;
 	wchar_t *pszThisFolder1 = new wchar_t[MAX_PATH];
-	//Получить местонахождение этой сраной дерриктории по сраному пидлу
+	//Получить местонахождение этой сраной дериктории по сраному пидлу
 	hr = SHGetNameFromIDList(ppidlCurrentFolder, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder1);
 	//Получаем имя директории нашего расширения
 	wchar_t *folderName = getFolderTitle();
 	int len = wcslen(folderName);
 	//получаем указатель на первое вхождение имени директории и пропускаем его -> получили указатель на имя пути внутри директории
-	wchar_t * contentPath = wcsstr(pszThisFolder1, folderName) + len + 1;
+	wchar_t * contentPath = NULL;
+	wchar_t emptyStr[1] = L"";
+	if (wcslen(wcsstr(pszThisFolder1, folderName)) == len)
+	{
+		contentPath = emptyStr;
+	}
+	else
+	{
+		contentPath = wcsstr(pszThisFolder1, folderName) + len + 1;
+	}	
 	//Вызвать собственный DataProvider для получения информации о содержимом этой директории
 	//Необходимо перевести tchar путь к запрашеваемой папке в char
 	char *cFolderPath = new char[MAX_PATH];

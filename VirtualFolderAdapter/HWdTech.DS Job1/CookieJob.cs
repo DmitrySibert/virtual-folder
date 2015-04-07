@@ -17,7 +17,7 @@ namespace VirtualFolderAdapter
     [NeedChannel("Cookie", IsTyped = true)]
     class CookieJob : IJob
     {
-        private String folder = "D:/";
+        private String folder = "";
 
         public CookieJob(IObject message)
         {
@@ -35,6 +35,12 @@ namespace VirtualFolderAdapter
             Field<String> type = new Field<String>("Type");
             type[message1] = "OpenFile";
             MessageBus.Send(message1);
+        }
+
+        [ChannelEndpointHanlder("Cookie", MessageType = "CurrentFolder")]
+        public void sendCurrentFolderToCookies(IMessage message)
+        {
+            folder = FolderContentMessage.Path[message];
         }
     }
 }

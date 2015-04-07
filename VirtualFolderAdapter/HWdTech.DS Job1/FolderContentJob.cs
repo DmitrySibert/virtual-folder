@@ -53,6 +53,12 @@ namespace DataAdapter.FolderContent
                     items.Add(folderItem);
                     pathContent[m] = items;
                 });
+
+                ObjectBuilder builder = Singleton<DIFactory>.Instance.Create<ObjectBuilder>();
+                IMessage message1 = Singleton<DIFactory>.Instance.Create<IMessage>();
+                builder.Message().Type("CurrentFolder").To(Singleton<DIFactory>.Instance.Create<IChannel>("Cookie")).Make(message1);
+                FolderContentMessage.Path[message1] = FolderContentMessage.Path[message];
+                MessageBus.Send(message1);
             }
         }
 
@@ -75,7 +81,7 @@ namespace DataAdapter.FolderContent
         {
             if (OpenFileMessage.IsMeet(message))
             {
-                String path = OpenFileMessage.CurrentPath[message] + OpenFileMessage.FileName[message];
+                String path = OpenFileMessage.CurrentPath[message] + "\\" + OpenFileMessage.FileName[message];
                 Process.Start(@path);
             }
         }
