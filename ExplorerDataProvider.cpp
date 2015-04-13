@@ -21,6 +21,7 @@
 #include "Guid.h"
 #include "fvcommands.h"
 #include "DataProvider.h"
+#include "CDropTarget.h"
 
 const int g_nMaxLevel = 5;
 
@@ -641,6 +642,21 @@ HRESULT CFolderViewImplFolder::CreateViewObject(HWND hwnd, REFIID riid, void **p
             pProvider->Release();
         }
     }
+	else if (riid == IID_IDropTarget)
+	{
+		CComObject<CNSFDropTarget> *pDropTarget;
+		CComObject<CNSFDropTarget>::CreateInstance(&pDropTarget);
+		if (FAILED(hr))
+			return hr;
+
+		pDropTarget->AddRef();
+
+		pDropTarget->_Init(NULL);
+
+		hr = pDropTarget->QueryInterface(IID_IDropTarget, ppv);
+		pDropTarget->Release();
+		hr = S_OK;
+	}
     return hr;
 }
 
@@ -721,7 +737,7 @@ HRESULT CFolderViewImplFolder::GetUIObjectOf(HWND hwnd, UINT cidl, PCUITEMID_CHI
     }
 	else if (riid == IID_IDropTarget)
 	{
-		bool k = true;
+		hr = S_OK;
 	}
     else if (riid == IID_IQueryAssociations)
     {

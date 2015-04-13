@@ -231,6 +231,7 @@ copy $(ProjectDir)external\dlls $(OutDir)</Command>
   <ItemGroup>
     <ClInclude Include="BaseMessage.h" />
     <ClInclude Include="Category.h" />
+    <ClInclude Include="CDropTarget.h" />
     <ClInclude Include="ContentMessage.h" />
     <ClInclude Include="DataProvider.h" />
     <ClInclude Include="fvcommands.h" />
