@@ -7,6 +7,7 @@
    (c) Microsoft Corporation. All Rights Reserved.
 **************************************************************************/
 
+#include "CDropTarget.h"
 #include <windows.h>
 #include <shlobj.h>
 #include <propkey.h>
@@ -21,7 +22,7 @@
 #include "Guid.h"
 #include "fvcommands.h"
 #include "DataProvider.h"
-#include "CDropTarget.h"
+
 
 const int g_nMaxLevel = 5;
 
@@ -644,18 +645,28 @@ HRESULT CFolderViewImplFolder::CreateViewObject(HWND hwnd, REFIID riid, void **p
     }
 	else if (riid == IID_IDropTarget)
 	{
-		CComObject<CNSFDropTarget> *pDropTarget;
-		CComObject<CNSFDropTarget>::CreateInstance(&pDropTarget);
-		if (FAILED(hr))
+		//CComModule _Module;
+
+		//CoInitialize(NULL);
+		//GetWindowLong(hwnd, GWL_HINSTANCE)
+		//_Module.Init(0, (HINSTANCE)hwnd);
+		/*CComObject<CNSFDropTarget> *pDropTarget;
+		hr = CComObject<CNSFDropTarget>::CreateInstance(&pDropTarget);*/
+
+		//_Module.Term();
+		//CoUninitialize();
+
+		/*if (FAILED(hr))
 			return hr;
 
 		pDropTarget->AddRef();
 
-		pDropTarget->_Init(NULL);
-
-		hr = pDropTarget->QueryInterface(IID_IDropTarget, ppv);
-		pDropTarget->Release();
-		hr = S_OK;
+		pDropTarget->_Init(NULL);*/
+		MyDropTarget *pMyDropTarget = new MyDropTarget;
+		pMyDropTarget->AddRef();
+		hr = pMyDropTarget->QueryInterface(IID_IDropTarget, ppv);
+		pMyDropTarget->Release();
+		//hr = S_OK;
 	}
     return hr;
 }
