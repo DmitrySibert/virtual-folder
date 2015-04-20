@@ -7,7 +7,7 @@
    (c) Microsoft Corporation. All Rights Reserved.
 **************************************************************************/
 
-#include "CDropTarget.h"
+#include "MyDropTarget.h"
 #include <windows.h>
 #include <shlobj.h>
 #include <propkey.h>

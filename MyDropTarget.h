@@ -1,8 +1,6 @@
 #include <atlbase.h>
 //#include "Utils.h"
 
-//////////////////////////////////////////////////////////////////////////////
-// CNSFDropTarget
 class MyDropTarget : public IDropTarget
 {
 private:
@@ -19,7 +17,7 @@ public:
 		//DllRelease();
 	}
 
-	//IUnknown
+	//IUnknown implementation
 	HRESULT MyDropTarget::QueryInterface(REFIID riid, void **ppv)
 	{
 		static const QITAB qit[] =
@@ -52,7 +50,7 @@ public:
 		return DROPEFFECT_MOVE;
 	}
 
-	// IDropTarget
+	// IDropTarget implementation
 	STDMETHOD(DragEnter)(LPDATAOBJECT pDataObj, DWORD dwKeyState, POINTL, LPDWORD pdwEffect)
 	{
 		*pdwEffect = _QueryDrop();
@@ -73,10 +71,24 @@ public:
 	STDMETHOD(Drop)(LPDATAOBJECT pDataObj, DWORD dwKeyState, POINTL /*pt*/, LPDWORD pdwEffect)
 	{
 
-		*pdwEffect = DROPEFFECT_NONE; // default to failed/cancelled
-		// Determine drop effect...
-		DWORD dwDropEffect = _QueryDrop();
-		// Did we accept this drop effect?
+		*pdwEffect = DROPEFFECT_NONE;
+		DWORD dwDropEffect = _QueryDrop();		
+		STGMEDIUM stgmed;
+		FORMATETC fe = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+		HRESULT hr = pDataObj->GetData(&fe, &stgmed);
+		if (S_OK == hr)
+		{
+			HDROP hDrop = (HDROP)stgmed.hGlobal;
+			UINT nFiles = DragQueryFile(hDrop, (UINT)-1, NULL, 0);
+			for (UINT i = 0; i < nFiles; i++)
+			{
+				TCHAR szFileDropped[MAX_PATH];
+				DragQueryFile(hDrop, i, szFileDropped, sizeof(szFileDropped));
+				bool t = true;
+			}
+		}
+		ReleaseStgMedium(&stgmed);
+
 		if (dwDropEffect == DROPEFFECT_NONE)
 			return S_OK;
 		return S_OK;

@@ -100,7 +100,7 @@
     <ClInclude Include="OpenFileMessage.h">
       <Filter>core\message</Filter>
     </ClInclude>
-    <ClInclude Include="CDropTarget.h">
+    <ClInclude Include="MyDropTarget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
