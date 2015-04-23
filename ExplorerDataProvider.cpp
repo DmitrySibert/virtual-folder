@@ -22,6 +22,7 @@
 #include "Guid.h"
 #include "fvcommands.h"
 #include "DataProvider.h"
+//#include "IDropHandler.h"
 
 
 const int g_nMaxLevel = 5;
@@ -51,7 +52,8 @@ typedef UNALIGNED FVITEMID *PFVITEMID;
 typedef const UNALIGNED FVITEMID *PCFVITEMID;
 
 class CFolderViewImplFolder : public IShellFolder2,
-                              public IPersistFolder2
+                              public IPersistFolder2,
+							  public IDropHandler
 {
 public:
     CFolderViewImplFolder(UINT nLevel);
@@ -95,6 +97,9 @@ public:
 
     // IDList constructor public for the enumerator object
     HRESULT CreateChildID(PCWSTR pszName, int nLevel, int nSize, int nSides, BOOL fIsFolder, PITEMID_CHILD *ppidl);
+
+	// IDropHandler
+	void DoDrop() const;
 
 private:
     ~CFolderViewImplFolder();
@@ -193,6 +198,11 @@ CFolderViewImplFolder::~CFolderViewImplFolder()
 
 HRESULT CFolderViewImplFolder::QueryInterface(REFIID riid, void **ppv)
 {
+	if (riid == IID_IDropHandler) {
+		*ppv = (IDropHandler*)this;
+		this->AddRef();
+		return S_OK;
+	}
     static const QITAB qit[] =
     {
         QITABENT(CFolderViewImplFolder, IShellFolder),
@@ -218,6 +228,11 @@ ULONG CFolderViewImplFolder::Release()
         delete this;
     }
     return cRef;
+}
+
+void CFolderViewImplFolder::DoDrop() const
+{
+	int k = 10;
 }
 
 //  Translates a display name into an item identifier list.
@@ -662,7 +677,9 @@ HRESULT CFolderViewImplFolder::CreateViewObject(HWND hwnd, REFIID riid, void **p
 		pDropTarget->AddRef();
 
 		pDropTarget->_Init(NULL);*/
-		MyDropTarget *pMyDropTarget = new MyDropTarget;
+		IUnknown *pFolder;
+		this->QueryInterface(IID_IUnknown, (void**) &pFolder);
+		MyDropTarget *pMyDropTarget = new MyDropTarget(pFolder);
 		pMyDropTarget->AddRef();
 		hr = pMyDropTarget->QueryInterface(IID_IDropTarget, ppv);
 		pMyDropTarget->Release();

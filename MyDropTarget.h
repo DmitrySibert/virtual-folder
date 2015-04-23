@@ -1,20 +1,24 @@
 #include <atlbase.h>
+#include "IDropHandler.h"
 //#include "Utils.h"
 
 class MyDropTarget : public IDropTarget
 {
 private:
 	long m_cRef;
+	IUnknown *m_pFolder;
 public:
 
-	MyDropTarget::MyDropTarget() : m_cRef(0)
+	MyDropTarget::MyDropTarget(IUnknown *pFolder) : m_cRef(0), m_pFolder(pFolder)
 	{
 		//DllAddRef();
+		m_pFolder->AddRef();
 	}
 
 	MyDropTarget::~MyDropTarget()
 	{
 		//DllRelease();
+		m_pFolder->Release();
 	}
 
 	//IUnknown implementation
@@ -88,7 +92,9 @@ public:
 			}
 		}
 		ReleaseStgMedium(&stgmed);
-
+		IDropHandler *pDropHandler;
+		this->m_pFolder->QueryInterface(IID_IDropHandler, (void**) &pDropHandler);
+		pDropHandler->DoDrop();
 		if (dwDropEffect == DROPEFFECT_NONE)
 			return S_OK;
 		return S_OK;
