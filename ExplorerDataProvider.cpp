@@ -99,7 +99,7 @@ public:
     HRESULT CreateChildID(PCWSTR pszName, int nLevel, int nSize, int nSides, BOOL fIsFolder, PITEMID_CHILD *ppidl);
 
 	// IDropHandler
-	void DoDrop() const;
+	void DoDrop(std::list<TCHAR*> files) const;
 
 private:
     ~CFolderViewImplFolder();
@@ -230,7 +230,7 @@ ULONG CFolderViewImplFolder::Release()
     return cRef;
 }
 
-void CFolderViewImplFolder::DoDrop() const
+void CFolderViewImplFolder::DoDrop(std::list<TCHAR*> files) const
 {
 	int k = 10;
 }
@@ -877,19 +877,6 @@ HRESULT CFolderViewImplFolder::GetClassID(CLSID *pClassID)
 HRESULT CFolderViewImplFolder::Initialize(PCIDLIST_ABSOLUTE pidl)
 {
     m_pidl = ILCloneFull(pidl);
-	//IMPORTANT
-	//PCFVITEMID pMyObj = _IsValid(this->m_pidl);
-	//PCFVITEMID pMyObj1 = _IsValid(pidl);
-	//PWSTR pszThisFolder1;
-	//HRESULT hr;
-	//Получить местонахождение этой сраной дерриктории по сраному пидлу
-	//hr = SHGetNameFromIDList(m_pidl, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder1);
-	//PWSTR pszThisFolder2;
-	//Получить местонахождение этой сраной дерриктории по сраному пидлу
-	//hr = SHGetNameFromIDList(m_pidl, SIGDN_DESKTOPABSOLUTEPARSING, &pszThisFolder2);
-	//TCHAR path[MAX_PATH];
-	//BOOL res = SHGetPathFromIDList(this->m_pidl, path);
-	//res = SHGetPathFromIDList(pidl, path);
     return m_pidl ? S_OK : E_FAIL;
 }
 

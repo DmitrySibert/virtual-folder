@@ -80,21 +80,31 @@ public:
 		STGMEDIUM stgmed;
 		FORMATETC fe = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 		HRESULT hr = pDataObj->GetData(&fe, &stgmed);
+		std::list<TCHAR*> files;
 		if (S_OK == hr)
 		{
 			HDROP hDrop = (HDROP)stgmed.hGlobal;
 			UINT nFiles = DragQueryFile(hDrop, (UINT)-1, NULL, 0);
 			for (UINT i = 0; i < nFiles; i++)
 			{
-				TCHAR szFileDropped[MAX_PATH];
-				DragQueryFile(hDrop, i, szFileDropped, sizeof(szFileDropped));
+				UINT nameSize = DragQueryFile(hDrop, i, NULL, 0) + 1;
+				TCHAR *szFileDropped = new TCHAR[nameSize];
+				DragQueryFile(hDrop, i, szFileDropped, nameSize);
+				files.push_back(szFileDropped);
 				bool t = true;
 			}
 		}
 		ReleaseStgMedium(&stgmed);
 		IDropHandler *pDropHandler;
 		this->m_pFolder->QueryInterface(IID_IDropHandler, (void**) &pDropHandler);
-		pDropHandler->DoDrop();
+		pDropHandler->DoDrop(files);
+		while(!files.empty())
+		{
+			TCHAR *file = files.back();
+			delete[] file;
+			files.pop_back();
+		}
+		this->m_pFolder->Release();
 		if (dwDropEffect == DROPEFFECT_NONE)
 			return S_OK;
 		return S_OK;
