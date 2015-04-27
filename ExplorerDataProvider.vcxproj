@@ -219,6 +219,7 @@ copy $(ProjectDir)external\dlls $(OutDir)</Command>
     <ClCompile Include="ContextMenu.cpp" />
     <ClCompile Include="DataProvider.cpp" />
     <ClCompile Include="Dll.cpp" />
+    <ClCompile Include="DropFilesMessage.cpp" />
     <ClCompile Include="ExplorerDataProvider.cpp" />
     <ClCompile Include="fvcommands.cpp" />
     <ClCompile Include="LogMessage.cpp" />
@@ -231,6 +232,7 @@ copy $(ProjectDir)external\dlls $(OutDir)</Command>
   <ItemGroup>
     <ClInclude Include="BaseMessage.h" />
     <ClInclude Include="Category.h" />
+    <ClInclude Include="DropFilesMessage.h" />
     <ClInclude Include="IDropHandler.h" />
     <ClInclude Include="MyDropTarget.h" />
     <ClInclude Include="ContentMessage.h" />

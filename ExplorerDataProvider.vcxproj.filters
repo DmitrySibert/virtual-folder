@@ -60,6 +60,9 @@
     <ClCompile Include="OpenFileMessage.cpp">
       <Filter>network\message</Filter>
     </ClCompile>
+    <ClCompile Include="DropFilesMessage.cpp">
+      <Filter>network\message</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ExplorerDataProvider.def">
@@ -105,6 +108,9 @@
     </ClInclude>
     <ClInclude Include="IDropHandler.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DropFilesMessage.h">
+      <Filter>network\message</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

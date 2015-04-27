@@ -7,30 +7,28 @@ BaseMessage::BaseMessage(const bool isRequest, const string channelName, const s
 {
 }
 
-StringBuffer BaseMessage::preSerialize() const
-{
-	StringBuffer jsonBuffer;
-	Writer<StringBuffer> requestBody(jsonBuffer);
-	requestBody.StartObject();
-	requestBody.String("IsRequest");
-	requestBody.Bool(this->isRequest);
-	requestBody.String("To");
-	requestBody.StartObject();
-	requestBody.String("Name");
-	requestBody.String(this->channelName.c_str());
-	requestBody.EndObject();
-	requestBody.String("Type");
-	requestBody.String(this->messageType.c_str());
-	requestBody.String("ID");
-	requestBody.String(this->UUID.c_str());
-	requestBody.EndObject();
-
-	return jsonBuffer;
+void BaseMessage::preSerialize(Writer<StringBuffer> &writer) const
+{	
+	writer.String("IsRequest");
+	writer.Bool(this->isRequest);
+	writer.String("To");
+	writer.StartObject();
+	writer.String("Name");
+	writer.String(this->channelName.c_str());
+	writer.EndObject();
+	writer.String("Type");
+	writer.String(this->messageType.c_str());
+	writer.String("ID");
+	writer.String(this->UUID.c_str());
 }
 
 string BaseMessage::serialize() const
-{
-	StringBuffer jsonBuffer = this->preSerialize();
+{	
+	StringBuffer jsonBuffer;
+	Writer<StringBuffer> writer(jsonBuffer);
+	writer.StartObject();
+	this->preSerialize(writer);
+	writer.EndObject();
 	string json = jsonBuffer.GetString();
 
 	return json;

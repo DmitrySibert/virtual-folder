@@ -5,6 +5,8 @@
 #include <rapidjson\writer.h>
 #include <rapidjson\stringbuffer.h>
 
+using namespace rapidjson;
+
 class BaseMessage:public IJsonSerializable
 {
 private:
@@ -14,7 +16,7 @@ private:
 	string UUID;
 protected:
 	//ћожно использовать в потомках дл€ получени€ сериализованной части родительского класа
-	virtual rapidjson::StringBuffer preSerialize() const;
+	virtual void preSerialize(Writer<StringBuffer> &writer) const;
 
 public:
 	BaseMessage(){}
