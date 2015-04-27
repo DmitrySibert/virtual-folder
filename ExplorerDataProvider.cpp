@@ -99,7 +99,7 @@ public:
     HRESULT CreateChildID(PCWSTR pszName, int nLevel, int nSize, int nSides, BOOL fIsFolder, PITEMID_CHILD *ppidl);
 
 	// IDropHandler
-	void DoDrop(std::list<TCHAR*> files) const;
+	void DoDrop(std::list<TCHAR*> files);
 
 private:
     ~CFolderViewImplFolder();
@@ -230,9 +230,31 @@ ULONG CFolderViewImplFolder::Release()
     return cRef;
 }
 
-void CFolderViewImplFolder::DoDrop(std::list<TCHAR*> files) const
+void CFolderViewImplFolder::DoDrop(list<TCHAR*> files)
 {
-	int k = 10;
+	list<char*> preparedFiles;
+	for (list<TCHAR*>::const_iterator it = files.begin(); it != files.end(); ++it)
+	{
+		char *file = new char[MAX_PATH];
+		WideCharToMultiByte(CP_ACP, // ANSI Code Page
+			0, // No special handling of unmapped chars
+			*it, // wide-character string to be converted
+			MAX_PATH,
+			file,
+			MAX_PATH,
+			NULL, NULL);
+		preparedFiles.push_back(file);
+	}
+	PIDLIST_ABSOLUTE ppidlCurrentFolder;
+	this->GetCurFolder(&ppidlCurrentFolder);
+	char* cFolderPath = GetRefPath(ppidlCurrentFolder);
+	DataProvider dataProvider;
+	dataProvider.dropFiles(preparedFiles, cFolderPath);
+	delete[] cFolderPath;
+	for (list<char*>::const_iterator it = preparedFiles.begin(); it != preparedFiles.end(); ++it)
+	{
+		delete[] *it;
+	}
 }
 
 //  Translates a display name into an item identifier list.
@@ -1336,43 +1358,10 @@ ULONG CFolderViewImplEnumIDList::Release()
 HRESULT CFolderViewImplEnumIDList::Initialize()
 {
     ZeroMemory(m_aData, sizeof(m_aData));
-	//IMPORTANT
-
 	PIDLIST_ABSOLUTE ppidlCurrentFolder;
 	this->m_pFolder->GetCurFolder(&ppidlCurrentFolder);
-    HRESULT hr = S_OK;
-	wchar_t *pszThisFolder1 = new wchar_t[MAX_PATH];
-	//Получить местонахождение этой сраной дериктории по сраному пидлу
-	hr = SHGetNameFromIDList(ppidlCurrentFolder, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder1);
-	//Получаем имя директории нашего расширения
-	wchar_t *folderName = getFolderTitle();
-	int len = wcslen(folderName);
-	//получаем указатель на первое вхождение имени директории и пропускаем его -> получили указатель на имя пути внутри директории
-	wchar_t * contentPath = NULL;
-	wchar_t emptyStr[1] = L"";
-	if (wcslen(wcsstr(pszThisFolder1, folderName)) == len)
-	{
-		contentPath = emptyStr;
-	}
-	else
-	{
-		contentPath = wcsstr(pszThisFolder1, folderName) + len + 1;
-	}	
-	//Вызвать собственный DataProvider для получения информации о содержимом этой директории
-	//Необходимо перевести tchar путь к запрашеваемой папке в char
-	char *cFolderPath = new char[MAX_PATH];
-	WideCharToMultiByte(CP_ACP, // ANSI Code Page
-		0, // No special handling of unmapped chars
-		contentPath, // wide-character string to be converted
-		MAX_PATH,
-		cFolderPath,
-		MAX_PATH,
-		NULL, NULL);
-	int kk = 10;
-	//delete[] pszThisFolder1;
-	delete[] folderName;
-	
-
+	HRESULT hr = S_OK;
+	char* cFolderPath = GetRefPath(ppidlCurrentFolder);
 	DataProvider dataProvider;
 	list<FolderElement> foldersElements = dataProvider.getFoldersContent(cFolderPath);
 	list<FolderElement>::iterator it = foldersElements.begin();

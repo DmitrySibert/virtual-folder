@@ -117,6 +117,12 @@ bool DataProvider::runFile(const char* file)
 	return true;
 }
 
+void DataProvider::dropFiles(std::list<char*> files, string folder)
+{
+	DropFilesMessage message(files, folder, true, "FolderContent", "DropFiles", "c69fb066-c0f4-11e4-8dfc-aa07a5b093db");
+	this->doJsonPost(message);
+}
+
 DataProvider::~DataProvider()
 {
 }

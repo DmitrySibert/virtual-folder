@@ -118,6 +118,42 @@ WCHAR* getFolderTitle()
 	return szBuff;
 }
 
+char* GetRefPath(PIDLIST_ABSOLUTE ppidlCurrentFolder)
+{
+	wchar_t *pszThisFolder1 = new wchar_t[MAX_PATH];
+	//Получить местонахождение этой сраной дериктории по сраному пидлу
+	SHGetNameFromIDList(ppidlCurrentFolder, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder1);
+	//Получаем имя директории нашего расширения
+	wchar_t *folderName = getFolderTitle();
+	int len = wcslen(folderName);
+	//получаем указатель на первое вхождение имени директории и пропускаем его -> получили указатель на имя пути внутри директории
+	wchar_t * contentPath = NULL;
+	wchar_t emptyStr[1] = L"";
+	if (wcslen(wcsstr(pszThisFolder1, folderName)) == len)
+	{
+		contentPath = emptyStr;
+	}
+	else
+	{
+		contentPath = wcsstr(pszThisFolder1, folderName) + len + 1;
+	}
+	//Вызвать собственный DataProvider для получения информации о содержимом этой директории
+	//Необходимо перевести tchar путь к запрашеваемой папке в char
+	char *cFolderPath = new char[MAX_PATH];
+	WideCharToMultiByte(CP_ACP, // ANSI Code Page
+		0, // No special handling of unmapped chars
+		contentPath, // wide-character string to be converted
+		MAX_PATH,
+		cFolderPath,
+		MAX_PATH,
+		NULL, NULL);
+	int kk = 10;
+	//delete[] pszThisFolder1;
+	delete[] folderName;
+
+	return cFolderPath;
+}
+
 HRESULT DisplayItem(IShellItemArray *psia, HWND hwnd)
 {
     // Get the first ShellItem and display its name

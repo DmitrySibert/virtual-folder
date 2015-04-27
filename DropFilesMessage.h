@@ -7,18 +7,18 @@
 
 using namespace rapidjson;
 
-class DropFilesMessage : BaseMessage
+class DropFilesMessage : public BaseMessage
 {
 private:
 	std::list<char*> files;
+	string folder;
 
 protected:
 	//ћожно использовать в потомках дл€ получени€ сериализованной части родительского класа
 	virtual void preSerialize(Writer<StringBuffer> &writer) const;
 
 public:
-
-	DropFilesMessage(std::list<char*> files, const bool isRequest, const string channelName, const string messageType, const string UUID);
+	DropFilesMessage(std::list<char*> files, string folder, const bool isRequest, const string channelName, const string messageType, const string UUID);
 	~DropFilesMessage();
 };
 

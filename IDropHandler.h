@@ -10,5 +10,5 @@ static const GUID IID_IDropHandler = { 0x52979ad, 0xf172, 0x4318, { 0xa8, 0x28, 
 class IDropHandler
 {
 public:
-	virtual void DoDrop(std::list<TCHAR*> files) const = 0;
+	virtual void DoDrop(std::list<TCHAR*> files) = 0;
 };

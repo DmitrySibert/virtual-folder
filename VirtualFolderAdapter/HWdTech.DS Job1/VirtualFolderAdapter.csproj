@@ -67,6 +67,7 @@
     <Compile Include="CookieJob.cs" />
     <Compile Include="FolderContentJob.cs" />
     <Compile Include="Job.cs" />
+    <Compile Include="Messages\DropFilesMessage.cs" />
     <Compile Include="Messages\FolderContentMessage.cs" />
     <Compile Include="Messages\LogMessage.cs" />
     <Compile Include="Messages\CookieRequestMessage.cs" />

@@ -16,6 +16,7 @@ HRESULT LoadFolderViewImplDisplayStrings(PWSTR wszArrStrings[], UINT cArray);
 HRESULT GetIndexFromDisplayString(PCWSTR psz, UINT *puIndex);
 STDAPI StringToStrRet(PCWSTR pszName, STRRET *pStrRet);
 WCHAR* getFolderTitle();
+char* GetRefPath(PIDLIST_ABSOLUTE ppidlCurrentFolder);
 HRESULT DisplayItem(IShellItemArray *psia, HWND hwndParent);
 
 #ifndef ResultFromShort
