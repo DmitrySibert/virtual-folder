@@ -6,12 +6,12 @@
 #include <rapidjson\document.h>
 #include <rapidjson\writer.h>
 #include <rapidjson\stringbuffer.h>
+#include "IJsonSerializable.h"
 #include "ContentMessage.h"
 #include "LogMessage.h"
-#include "IJsonSerializable.h"
+#include "OpenFileMessage.h"
 
 using namespace std;
-
 
 struct FolderElement{
 	bool isFolder;
@@ -26,6 +26,7 @@ private:
 public:
 	DataProvider();
 	list<FolderElement> getFoldersContent(const char* path);
+	bool runFile(const char* file);
 	void logInfo(const char* message);
 	~DataProvider();
 private:

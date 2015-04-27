@@ -7,6 +7,7 @@
    (c) Microsoft Corporation. All Rights Reserved.
 **************************************************************************/
 
+#include "MyDropTarget.h"
 #include <windows.h>
 #include <shlobj.h>
 #include <propkey.h>
@@ -21,6 +22,8 @@
 #include "Guid.h"
 #include "fvcommands.h"
 #include "DataProvider.h"
+//#include "IDropHandler.h"
+
 
 const int g_nMaxLevel = 5;
 
@@ -49,7 +52,8 @@ typedef UNALIGNED FVITEMID *PFVITEMID;
 typedef const UNALIGNED FVITEMID *PCFVITEMID;
 
 class CFolderViewImplFolder : public IShellFolder2,
-                              public IPersistFolder2
+                              public IPersistFolder2,
+							  public IDropHandler
 {
 public:
     CFolderViewImplFolder(UINT nLevel);
@@ -93,6 +97,9 @@ public:
 
     // IDList constructor public for the enumerator object
     HRESULT CreateChildID(PCWSTR pszName, int nLevel, int nSize, int nSides, BOOL fIsFolder, PITEMID_CHILD *ppidl);
+
+	// IDropHandler
+	void DoDrop(std::list<TCHAR*> files) const;
 
 private:
     ~CFolderViewImplFolder();
@@ -191,6 +198,11 @@ CFolderViewImplFolder::~CFolderViewImplFolder()
 
 HRESULT CFolderViewImplFolder::QueryInterface(REFIID riid, void **ppv)
 {
+	if (riid == IID_IDropHandler) {
+		*ppv = (IDropHandler*)this;
+		this->AddRef();
+		return S_OK;
+	}
     static const QITAB qit[] =
     {
         QITABENT(CFolderViewImplFolder, IShellFolder),
@@ -216,6 +228,11 @@ ULONG CFolderViewImplFolder::Release()
         delete this;
     }
     return cRef;
+}
+
+void CFolderViewImplFolder::DoDrop(std::list<TCHAR*> files) const
+{
+	int k = 10;
 }
 
 //  Translates a display name into an item identifier list.
@@ -641,6 +658,33 @@ HRESULT CFolderViewImplFolder::CreateViewObject(HWND hwnd, REFIID riid, void **p
             pProvider->Release();
         }
     }
+	else if (riid == IID_IDropTarget)
+	{
+		//CComModule _Module;
+
+		//CoInitialize(NULL);
+		//GetWindowLong(hwnd, GWL_HINSTANCE)
+		//_Module.Init(0, (HINSTANCE)hwnd);
+		/*CComObject<CNSFDropTarget> *pDropTarget;
+		hr = CComObject<CNSFDropTarget>::CreateInstance(&pDropTarget);*/
+
+		//_Module.Term();
+		//CoUninitialize();
+
+		/*if (FAILED(hr))
+			return hr;
+
+		pDropTarget->AddRef();
+
+		pDropTarget->_Init(NULL);*/
+		IUnknown *pFolder;
+		this->QueryInterface(IID_IUnknown, (void**) &pFolder);
+		MyDropTarget *pMyDropTarget = new MyDropTarget(pFolder);
+		pMyDropTarget->AddRef();
+		hr = pMyDropTarget->QueryInterface(IID_IDropTarget, ppv);
+		pMyDropTarget->Release();
+		//hr = S_OK;
+	}
     return hr;
 }
 
@@ -721,7 +765,7 @@ HRESULT CFolderViewImplFolder::GetUIObjectOf(HWND hwnd, UINT cidl, PCUITEMID_CHI
     }
 	else if (riid == IID_IDropTarget)
 	{
-		bool k = true;
+		hr = S_OK;
 	}
     else if (riid == IID_IQueryAssociations)
     {
@@ -833,19 +877,6 @@ HRESULT CFolderViewImplFolder::GetClassID(CLSID *pClassID)
 HRESULT CFolderViewImplFolder::Initialize(PCIDLIST_ABSOLUTE pidl)
 {
     m_pidl = ILCloneFull(pidl);
-	//IMPORTANT
-	//PCFVITEMID pMyObj = _IsValid(this->m_pidl);
-	//PCFVITEMID pMyObj1 = _IsValid(pidl);
-	//PWSTR pszThisFolder1;
-	//HRESULT hr;
-	//Получить местонахождение этой сраной дерриктории по сраному пидлу
-	//hr = SHGetNameFromIDList(m_pidl, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder1);
-	//PWSTR pszThisFolder2;
-	//Получить местонахождение этой сраной дерриктории по сраному пидлу
-	//hr = SHGetNameFromIDList(m_pidl, SIGDN_DESKTOPABSOLUTEPARSING, &pszThisFolder2);
-	//TCHAR path[MAX_PATH];
-	//BOOL res = SHGetPathFromIDList(this->m_pidl, path);
-	//res = SHGetPathFromIDList(pidl, path);
     return m_pidl ? S_OK : E_FAIL;
 }
 
@@ -1309,17 +1340,24 @@ HRESULT CFolderViewImplEnumIDList::Initialize()
 
 	PIDLIST_ABSOLUTE ppidlCurrentFolder;
 	this->m_pFolder->GetCurFolder(&ppidlCurrentFolder);
-	//PFVITEMID item = (PFVITEMID) ppidlCurrentFolder->mkid.abID;
-	//PCFVITEMID pidmine = (PCFVITEMID)ppidlCurrentFolder;
     HRESULT hr = S_OK;
 	wchar_t *pszThisFolder1 = new wchar_t[MAX_PATH];
-	//Получить местонахождение этой сраной дерриктории по сраному пидлу
+	//Получить местонахождение этой сраной дериктории по сраному пидлу
 	hr = SHGetNameFromIDList(ppidlCurrentFolder, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder1);
 	//Получаем имя директории нашего расширения
 	wchar_t *folderName = getFolderTitle();
 	int len = wcslen(folderName);
 	//получаем указатель на первое вхождение имени директории и пропускаем его -> получили указатель на имя пути внутри директории
-	wchar_t * contentPath = wcsstr(pszThisFolder1, folderName) + len + 1;
+	wchar_t * contentPath = NULL;
+	wchar_t emptyStr[1] = L"";
+	if (wcslen(wcsstr(pszThisFolder1, folderName)) == len)
+	{
+		contentPath = emptyStr;
+	}
+	else
+	{
+		contentPath = wcsstr(pszThisFolder1, folderName) + len + 1;
+	}	
 	//Вызвать собственный DataProvider для получения информации о содержимом этой директории
 	//Необходимо перевести tchar путь к запрашеваемой папке в char
 	char *cFolderPath = new char[MAX_PATH];

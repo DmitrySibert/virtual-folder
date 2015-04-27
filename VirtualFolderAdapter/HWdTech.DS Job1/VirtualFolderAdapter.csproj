@@ -64,8 +64,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CookieJob.cs" />
     <Compile Include="FolderContentJob.cs" />
     <Compile Include="Job.cs" />
+    <Compile Include="Messages\FolderContentMessage.cs" />
+    <Compile Include="Messages\LogMessage.cs" />
+    <Compile Include="Messages\CookieRequestMessage.cs" />
+    <Compile Include="Messages\OpenFileMessage.cs" />
+    <Compile Include="Messages\TryOpenFileMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

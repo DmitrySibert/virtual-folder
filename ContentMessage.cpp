@@ -9,7 +9,7 @@ ContentMessage::ContentMessage(const string path, const bool isRequest, const st
 
 string ContentMessage::serialize() const
 {
-	/*StringBuffer jsonBuffer;
+	StringBuffer jsonBuffer;
 	Writer<StringBuffer> requestBody(jsonBuffer);
 	requestBody.StartObject();
 	requestBody.String("IsRequest");
@@ -22,9 +22,9 @@ string ContentMessage::serialize() const
 	requestBody.String("Type");
 	requestBody.String(BaseMessage::getMessageType().c_str());
 	requestBody.String("ID");
-	requestBody.String(BaseMessage::getUuid().c_str());*/
-	StringBuffer jsonBuffer = BaseMessage::preSerialize();
-	Writer<StringBuffer> requestBody(jsonBuffer);
+	requestBody.String(BaseMessage::getUuid().c_str());
+	/*StringBuffer jsonBuffer = BaseMessage::preSerialize();
+	Writer<StringBuffer> requestBody(jsonBuffer);*/
 	requestBody.String("Path");
 	requestBody.String(this->path.c_str());
 	requestBody.EndObject();

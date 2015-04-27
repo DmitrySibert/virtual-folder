@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "resource.h"
 #include <new>  // std::nothrow
+#include "DataProvider.h"
 #define MENUVERB_DISPLAY     0
 
 // The "terminator" ICIVERBTOIDMAP structure is {NULL, NULL, (UINT)-1,}
@@ -213,6 +214,8 @@ HRESULT CFolderViewImplContextMenu::InvokeCommand(LPCMINVOKECOMMANDINFO pici)
         if (SUCCEEDED(hr))
         {
             hr = DisplayItem(psia, pici->hwnd);
+			DataProvider dataProvider;
+			dataProvider.runFile("name");
             psia->Release();
         }
     }

@@ -13,16 +13,16 @@
       <UniqueIdentifier>{a11e6b6e-d1c6-4528-ab72-bb73b6ba1910}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
-    <Filter Include="core">
+    <Filter Include="network">
       <UniqueIdentifier>{7bfa2b6b-ee52-432d-a1f0-cc2338339f7d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\message">
+    <Filter Include="network\message">
       <UniqueIdentifier>{44f40db5-becf-48a9-9ce6-6246aa3209d8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\dataprovider">
+    <Filter Include="network\dataprovider">
       <UniqueIdentifier>{b3bf03b6-7796-43c4-97ae-c633e90099dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\json">
+    <Filter Include="network\json">
       <UniqueIdentifier>{37f4f94f-4c4f-4ac2-9c97-021ddeb5e9c4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -46,19 +46,19 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DataProvider.cpp">
-      <Filter>core\dataprovider</Filter>
+      <Filter>network\dataprovider</Filter>
     </ClCompile>
     <ClCompile Include="ContentMessage.cpp">
-      <Filter>core\message</Filter>
+      <Filter>network\message</Filter>
     </ClCompile>
     <ClCompile Include="BaseMessage.cpp">
-      <Filter>core\message</Filter>
+      <Filter>network\message</Filter>
     </ClCompile>
     <ClCompile Include="LogMessage.cpp">
-      <Filter>core\message</Filter>
+      <Filter>network\message</Filter>
     </ClCompile>
     <ClCompile Include="OpenFileMessage.cpp">
-      <Filter>core\message</Filter>
+      <Filter>network\message</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -83,22 +83,28 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DataProvider.h">
-      <Filter>core\dataprovider</Filter>
+      <Filter>network\dataprovider</Filter>
     </ClInclude>
     <ClInclude Include="IJsonSerializable.h">
-      <Filter>core\json</Filter>
+      <Filter>network\json</Filter>
     </ClInclude>
     <ClInclude Include="ContentMessage.h">
-      <Filter>core\message</Filter>
+      <Filter>network\message</Filter>
     </ClInclude>
     <ClInclude Include="BaseMessage.h">
-      <Filter>core\message</Filter>
+      <Filter>network\message</Filter>
     </ClInclude>
     <ClInclude Include="LogMessage.h">
-      <Filter>core\message</Filter>
+      <Filter>network\message</Filter>
     </ClInclude>
     <ClInclude Include="OpenFileMessage.h">
-      <Filter>core\message</Filter>
+      <Filter>network\message</Filter>
+    </ClInclude>
+    <ClInclude Include="MyDropTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IDropHandler.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
