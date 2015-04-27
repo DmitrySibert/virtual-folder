@@ -7,18 +7,12 @@ LogMessage::LogMessage(const string text, const bool isRequest, const string cha
 {
 }
 
-string LogMessage::serialize() const
+void LogMessage::preSerialize(Writer<StringBuffer> &writer) const
 {
-	StringBuffer jsonBuffer = BaseMessage::preSerialize();
-	Writer<StringBuffer> requestBody(jsonBuffer);
-	requestBody.String("LogMsg");
-	requestBody.String(this->text.c_str());
-	requestBody.EndObject();
-	string json = jsonBuffer.GetString();
-
-	return json;
+	BaseMessage::preSerialize(writer);
+	writer.String("LogMsg");
+	writer.String(this->text.c_str());
 }
-
 
 LogMessage::~LogMessage()
 {
