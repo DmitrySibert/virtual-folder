@@ -92,21 +92,8 @@ list<FolderElement> DataProvider::getFoldersContent(const char* path)
 
 void DataProvider::logInfo(const char* info)
 {
-	CURL *curl;
-	CURLcode res;
-	struct curl_slist *headers = NULL; // init to NULL is important 
-	curl_slist_append(headers, "Accept: application/json");
-	curl_slist_append(headers, "Content-Type: application/json");
-	curl_slist_append(headers, "charsets: utf-8");
-	curl = curl_easy_init();
-	LogMessage message(info, true, "Logger", "Log", "43515c7a-a182-4ac4-9d36-6d563b2b0b3c");
-	if (curl) {
-		curl_easy_setopt(curl, CURLOPT_URL, this->url);
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, message.serialize().c_str());
-		res = curl_easy_perform(curl);
-		curl_easy_cleanup(curl);
-	}
+	LogMessage message(info, true, "Logger", "Log", "c69fb066-c0f4-11e4-8dfc-aa07a5b093db");
+	this->doJsonPost(message);
 }
 
 bool DataProvider::runFile(const char* file)

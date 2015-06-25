@@ -7,9 +7,10 @@ class MyDropTarget : public IDropTarget
 private:
 	long m_cRef;
 	IUnknown *m_pFolder;
+	LPCITEMIDLIST m_subfolder;
 public:
 
-	MyDropTarget::MyDropTarget(IUnknown *pFolder) : m_cRef(0), m_pFolder(pFolder)
+	MyDropTarget::MyDropTarget(IUnknown *pFolder, LPCITEMIDLIST subfolder) : m_cRef(0), m_pFolder(pFolder), m_subfolder(subfolder)
 	{
 		//DllAddRef();
 		m_pFolder->AddRef();
@@ -97,7 +98,7 @@ public:
 		ReleaseStgMedium(&stgmed);
 		IDropHandler *pDropHandler;
 		this->m_pFolder->QueryInterface(IID_IDropHandler, (void**) &pDropHandler);
-		pDropHandler->DoDrop(files);
+		pDropHandler->DoDrop(files, this->m_subfolder);
 		while(!files.empty())
 		{
 			TCHAR *file = files.back();

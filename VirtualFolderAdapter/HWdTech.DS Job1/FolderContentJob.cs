@@ -72,6 +72,7 @@ namespace DataAdapter.FolderContent
                 {
                     Console.WriteLine("File dropped = {0}", file);
                 }
+                MessageBus.TrySendUnsuccessResponse(message, "Files dropping success");
             }
         }
 

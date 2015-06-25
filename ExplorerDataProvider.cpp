@@ -99,7 +99,7 @@ public:
     HRESULT CreateChildID(PCWSTR pszName, int nLevel, int nSize, int nSides, BOOL fIsFolder, PITEMID_CHILD *ppidl);
 
 	// IDropHandler
-	void DoDrop(std::list<TCHAR*> files);
+	void DoDrop(std::list<TCHAR*> files, LPCITEMIDLIST subfolder);
 
 private:
     ~CFolderViewImplFolder();
@@ -230,7 +230,7 @@ ULONG CFolderViewImplFolder::Release()
     return cRef;
 }
 
-void CFolderViewImplFolder::DoDrop(list<TCHAR*> files)
+void CFolderViewImplFolder::DoDrop(list<TCHAR*> files, LPCITEMIDLIST subfolder)
 {
 	list<char*> preparedFiles;
 	for (list<TCHAR*>::const_iterator it = files.begin(); it != files.end(); ++it)
@@ -239,15 +239,23 @@ void CFolderViewImplFolder::DoDrop(list<TCHAR*> files)
 		WideCharToMultiByte(CP_ACP, // ANSI Code Page
 			0, // No special handling of unmapped chars
 			*it, // wide-character string to be converted
-			MAX_PATH,
-			file,
-			MAX_PATH,
-			NULL, NULL);
+			MAX_PATH, file, MAX_PATH, NULL, NULL);
 		preparedFiles.push_back(file);
 	}
 	PIDLIST_ABSOLUTE ppidlCurrentFolder;
 	this->GetCurFolder(&ppidlCurrentFolder);
 	char* cFolderPath = GetRefPath(ppidlCurrentFolder);
+	if (subfolder != NULL) {
+		WCHAR subfolderName[MAX_PATH];
+		this->_GetName(subfolder, subfolderName, ARRAYSIZE(subfolderName));
+		char *szSubfolderName = new char[MAX_PATH];
+		WideCharToMultiByte(CP_ACP, // ANSI Code Page
+			0, // No special handling of unmapped chars
+			subfolderName, // wide-character string to be converted
+			MAX_PATH, szSubfolderName, MAX_PATH, NULL, NULL);
+		strcat(cFolderPath, "\\");
+		strcat(cFolderPath, szSubfolderName);
+	}
 	DataProvider dataProvider;
 	dataProvider.dropFiles(preparedFiles, cFolderPath);
 	delete[] cFolderPath;
@@ -682,26 +690,9 @@ HRESULT CFolderViewImplFolder::CreateViewObject(HWND hwnd, REFIID riid, void **p
     }
 	else if (riid == IID_IDropTarget)
 	{
-		//CComModule _Module;
-
-		//CoInitialize(NULL);
-		//GetWindowLong(hwnd, GWL_HINSTANCE)
-		//_Module.Init(0, (HINSTANCE)hwnd);
-		/*CComObject<CNSFDropTarget> *pDropTarget;
-		hr = CComObject<CNSFDropTarget>::CreateInstance(&pDropTarget);*/
-
-		//_Module.Term();
-		//CoUninitialize();
-
-		/*if (FAILED(hr))
-			return hr;
-
-		pDropTarget->AddRef();
-
-		pDropTarget->_Init(NULL);*/
 		IUnknown *pFolder;
 		this->QueryInterface(IID_IUnknown, (void**) &pFolder);
-		MyDropTarget *pMyDropTarget = new MyDropTarget(pFolder);
+		MyDropTarget *pMyDropTarget = new MyDropTarget(pFolder, NULL);
 		pMyDropTarget->AddRef();
 		hr = pMyDropTarget->QueryInterface(IID_IDropTarget, ppv);
 		pMyDropTarget->Release();
@@ -779,15 +770,26 @@ HRESULT CFolderViewImplFolder::GetUIObjectOf(HWND hwnd, UINT cidl, PCUITEMID_CHI
             pdxi->Release();
         }
     }
-    else if (riid == IID_IDataObject)
-    {
-        hr = SHCreateDataObject(m_pidl, cidl, apidl, NULL, riid, ppv);
-		//DataProvider dataProvider;
-		//dataProvider.getFoldersContent("IID_IDataObject");
-    }
 	else if (riid == IID_IDropTarget)
 	{
-		hr = S_OK;
+		IUnknown *pFolder;
+		WCHAR szDisplayName[MAX_PATH];
+		this->_GetName(apidl[0], szDisplayName, ARRAYSIZE(szDisplayName));
+		char *file = new char[MAX_PATH];
+		WideCharToMultiByte(CP_ACP, // ANSI Code Page
+			0, // No special handling of unmapped chars
+			szDisplayName, // wide-character string to be converted
+			MAX_PATH,
+			file,
+			MAX_PATH,
+			NULL, NULL);
+		DataProvider dataprovider;
+		dataprovider.logInfo(file);
+		this->QueryInterface(IID_IUnknown, (void**)&pFolder);
+		MyDropTarget *pMyDropTarget = new MyDropTarget(pFolder, apidl[0]);
+		pMyDropTarget->AddRef();
+		hr = pMyDropTarget->QueryInterface(IID_IDropTarget, ppv);
+		pMyDropTarget->Release();
 	}
     else if (riid == IID_IQueryAssociations)
     {
