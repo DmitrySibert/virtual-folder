@@ -10,6 +10,7 @@
 #include "ContentMessage.h"
 #include "LogMessage.h"
 #include "OpenFileMessage.h"
+#include "DropFilesMessage.h"
 
 using namespace std;
 
@@ -27,6 +28,7 @@ public:
 	DataProvider();
 	list<FolderElement> getFoldersContent(const char* path);
 	bool runFile(const char* file);
+	void dropFiles(std::list<char*> files, string folder);
 	void logInfo(const char* message);
 	~DataProvider();
 private:

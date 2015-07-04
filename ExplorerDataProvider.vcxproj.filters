@@ -112,6 +112,9 @@
     <ClInclude Include="DropFilesMessage.h">
       <Filter>network\message</Filter>
     </ClInclude>
+    <ClInclude Include="MyDropSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ExplorerDataProvider.rc">

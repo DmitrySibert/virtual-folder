@@ -22,6 +22,7 @@
 #include "Guid.h"
 #include "fvcommands.h"
 #include "DataProvider.h"
+#include "MyDropSource.h"
 //#include "IDropHandler.h"
 
 
@@ -99,7 +100,7 @@ public:
     HRESULT CreateChildID(PCWSTR pszName, int nLevel, int nSize, int nSides, BOOL fIsFolder, PITEMID_CHILD *ppidl);
 
 	// IDropHandler
-	void DoDrop(std::list<TCHAR*> files) const;
+	void DoDrop(std::list<TCHAR*> files, LPCITEMIDLIST subfolder);
 
 private:
     ~CFolderViewImplFolder();
@@ -230,9 +231,40 @@ ULONG CFolderViewImplFolder::Release()
     return cRef;
 }
 
-void CFolderViewImplFolder::DoDrop(std::list<TCHAR*> files) const
+
+void CFolderViewImplFolder::DoDrop(list<TCHAR*> files, LPCITEMIDLIST subfolder)
 {
-	int k = 10;
+	list<char*> preparedFiles;
+	for (list<TCHAR*>::const_iterator it = files.begin(); it != files.end(); ++it)
+	{
+		char *file = new char[MAX_PATH];
+		WideCharToMultiByte(CP_ACP, // ANSI Code Page
+			0, // No special handling of unmapped chars
+			*it, // wide-character string to be converted
+			MAX_PATH, file, MAX_PATH, NULL, NULL);
+		preparedFiles.push_back(file);
+	}
+	PIDLIST_ABSOLUTE ppidlCurrentFolder;
+	this->GetCurFolder(&ppidlCurrentFolder);
+	char* cFolderPath = GetRefPath(ppidlCurrentFolder);
+	if (subfolder != NULL) {
+		WCHAR subfolderName[MAX_PATH];
+		this->_GetName(subfolder, subfolderName, ARRAYSIZE(subfolderName));
+		char *szSubfolderName = new char[MAX_PATH];
+		WideCharToMultiByte(CP_ACP, // ANSI Code Page
+			0, // No special handling of unmapped chars
+			subfolderName, // wide-character string to be converted
+			MAX_PATH, szSubfolderName, MAX_PATH, NULL, NULL);
+		strcat(cFolderPath, "\\");
+		strcat(cFolderPath, szSubfolderName);
+	}
+	DataProvider dataProvider;
+	dataProvider.dropFiles(preparedFiles, cFolderPath);
+	delete[] cFolderPath;
+	for (list<char*>::const_iterator it = preparedFiles.begin(); it != preparedFiles.end(); ++it)
+	{
+		delete[] *it;
+	}
 }
 
 //  Translates a display name into an item identifier list.
@@ -660,30 +692,21 @@ HRESULT CFolderViewImplFolder::CreateViewObject(HWND hwnd, REFIID riid, void **p
     }
 	else if (riid == IID_IDropTarget)
 	{
-		//CComModule _Module;
-
-		//CoInitialize(NULL);
-		//GetWindowLong(hwnd, GWL_HINSTANCE)
-		//_Module.Init(0, (HINSTANCE)hwnd);
-		/*CComObject<CNSFDropTarget> *pDropTarget;
-		hr = CComObject<CNSFDropTarget>::CreateInstance(&pDropTarget);*/
-
-		//_Module.Term();
-		//CoUninitialize();
-
-		/*if (FAILED(hr))
-			return hr;
-
-		pDropTarget->AddRef();
-
-		pDropTarget->_Init(NULL);*/
 		IUnknown *pFolder;
 		this->QueryInterface(IID_IUnknown, (void**) &pFolder);
-		MyDropTarget *pMyDropTarget = new MyDropTarget(pFolder);
+		MyDropTarget *pMyDropTarget = new MyDropTarget(pFolder, NULL);
 		pMyDropTarget->AddRef();
 		hr = pMyDropTarget->QueryInterface(IID_IDropTarget, ppv);
 		pMyDropTarget->Release();
-		//hr = S_OK;
+	}
+	else if (riid == IID_IDropSource)
+	{
+		IUnknown *pFolder;
+		this->QueryInterface(IID_IUnknown, (void**)&pFolder);
+		MyDropSource *pMyDropSource = new MyDropSource(pFolder);
+		pMyDropSource->AddRef();
+		hr = pMyDropSource->QueryInterface(IID_IDropSource, ppv);
+		pMyDropSource->Release();
 	}
     return hr;
 }
@@ -757,15 +780,26 @@ HRESULT CFolderViewImplFolder::GetUIObjectOf(HWND hwnd, UINT cidl, PCUITEMID_CHI
             pdxi->Release();
         }
     }
-    else if (riid == IID_IDataObject)
-    {
-        hr = SHCreateDataObject(m_pidl, cidl, apidl, NULL, riid, ppv);
-		//DataProvider dataProvider;
-		//dataProvider.getFoldersContent("IID_IDataObject");
-    }
 	else if (riid == IID_IDropTarget)
 	{
-		hr = S_OK;
+		IUnknown *pFolder;
+		WCHAR szDisplayName[MAX_PATH];
+		this->_GetName(apidl[0], szDisplayName, ARRAYSIZE(szDisplayName));
+		char *file = new char[MAX_PATH];
+		WideCharToMultiByte(CP_ACP, // ANSI Code Page
+			0, // No special handling of unmapped chars
+			szDisplayName, // wide-character string to be converted
+			MAX_PATH,
+			file,
+			MAX_PATH,
+			NULL, NULL);
+		DataProvider dataprovider;
+		dataprovider.logInfo(file);
+		this->QueryInterface(IID_IUnknown, (void**)&pFolder);
+		MyDropTarget *pMyDropTarget = new MyDropTarget(pFolder, apidl[0]);
+		pMyDropTarget->AddRef();
+		hr = pMyDropTarget->QueryInterface(IID_IDropTarget, ppv);
+		pMyDropTarget->Release();
 	}
     else if (riid == IID_IQueryAssociations)
     {
@@ -1336,43 +1370,10 @@ ULONG CFolderViewImplEnumIDList::Release()
 HRESULT CFolderViewImplEnumIDList::Initialize()
 {
     ZeroMemory(m_aData, sizeof(m_aData));
-	//IMPORTANT
-
 	PIDLIST_ABSOLUTE ppidlCurrentFolder;
 	this->m_pFolder->GetCurFolder(&ppidlCurrentFolder);
-    HRESULT hr = S_OK;
-	wchar_t *pszThisFolder1 = new wchar_t[MAX_PATH];
-	//Получить местонахождение этой сраной дериктории по сраному пидлу
-	hr = SHGetNameFromIDList(ppidlCurrentFolder, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder1);
-	//Получаем имя директории нашего расширения
-	wchar_t *folderName = getFolderTitle();
-	int len = wcslen(folderName);
-	//получаем указатель на первое вхождение имени директории и пропускаем его -> получили указатель на имя пути внутри директории
-	wchar_t * contentPath = NULL;
-	wchar_t emptyStr[1] = L"";
-	if (wcslen(wcsstr(pszThisFolder1, folderName)) == len)
-	{
-		contentPath = emptyStr;
-	}
-	else
-	{
-		contentPath = wcsstr(pszThisFolder1, folderName) + len + 1;
-	}	
-	//Вызвать собственный DataProvider для получения информации о содержимом этой директории
-	//Необходимо перевести tchar путь к запрашеваемой папке в char
-	char *cFolderPath = new char[MAX_PATH];
-	WideCharToMultiByte(CP_ACP, // ANSI Code Page
-		0, // No special handling of unmapped chars
-		contentPath, // wide-character string to be converted
-		MAX_PATH,
-		cFolderPath,
-		MAX_PATH,
-		NULL, NULL);
-	int kk = 10;
-	//delete[] pszThisFolder1;
-	delete[] folderName;
-	
-
+	HRESULT hr = S_OK;
+	char* cFolderPath = GetRefPath(ppidlCurrentFolder);
 	DataProvider dataProvider;
 	list<FolderElement> foldersElements = dataProvider.getFoldersContent(cFolderPath);
 	list<FolderElement>::iterator it = foldersElements.begin();
@@ -1509,8 +1510,45 @@ public:
     }
 
     // IShellFolderViewCB
-    IFACEMETHODIMP MessageSFVCB(UINT /* uMsg */, WPARAM /* wParam */, LPARAM /* lParam */)
-        { return E_NOTIMPL; }
+    IFACEMETHODIMP MessageSFVCB(UINT  uMsg, WPARAM /* wParam */, LPARAM  lParam )
+    {
+		char buf[12];
+		itoa(uMsg, buf, 10);
+		DataProvider dataProvider;
+		dataProvider.logInfo(buf);
+		switch (uMsg)
+		{
+			case SFVM_DIDDRAGDROP:
+			{
+				return E_NOTIMPL;
+			}
+			case WM_MOUSEMOVE:
+			{
+				return E_NOTIMPL;
+			}
+
+			case WM_LBUTTONUP:
+			{
+				return E_NOTIMPL;
+			}
+			case WM_DROPFILES:
+			{
+				return E_NOTIMPL;
+			}
+			case WM_NOTIFY:
+			{
+				switch (((LPNMHDR)lParam)->code)
+				{
+					case LVN_BEGINRDRAG:
+					{
+						return E_NOTIMPL;
+					}
+				}
+				LPNMLISTVIEW pnmv = (LPNMLISTVIEW)lParam;
+			}
+		}
+		return E_NOTIMPL;
+	}
 
     // IFolderViewSettings
     IFACEMETHODIMP GetColumnPropertyList(REFIID /* riid */, void **ppv)

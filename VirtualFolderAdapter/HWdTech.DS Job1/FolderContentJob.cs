@@ -62,6 +62,20 @@ namespace DataAdapter.FolderContent
             }
         }
 
+        [ChannelEndpointHanlder("FolderContent", MessageType = "DropFiles")]
+        public void dropFiles(IMessage message)
+        {
+            if (DropFilesMessage.IsMeet(message))
+            {
+                Console.WriteLine("Folder to drop = {0}", DropFilesMessage.Folder[message]);
+                foreach(String file in DropFilesMessage.Files[message])
+                {
+                    Console.WriteLine("File dropped = {0}", file);
+                }
+                MessageBus.TrySendUnsuccessResponse(message, "Files dropping success");
+            }
+        }
+
         [ChannelEndpointHanlder("FolderContent", MessageType = "TryOpenFile")]
         public void tryOpenFile(IMessage message)
         {
