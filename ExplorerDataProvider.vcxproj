@@ -234,6 +234,7 @@ copy $(ProjectDir)external\dlls $(OutDir)</Command>
     <ClInclude Include="Category.h" />
     <ClInclude Include="DropFilesMessage.h" />
     <ClInclude Include="IDropHandler.h" />
+    <ClInclude Include="MyDropSource.h" />
     <ClInclude Include="MyDropTarget.h" />
     <ClInclude Include="ContentMessage.h" />
     <ClInclude Include="DataProvider.h" />

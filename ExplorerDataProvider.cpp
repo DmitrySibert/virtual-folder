@@ -22,6 +22,7 @@
 #include "Guid.h"
 #include "fvcommands.h"
 #include "DataProvider.h"
+#include "MyDropSource.h"
 //#include "IDropHandler.h"
 
 
@@ -229,6 +230,7 @@ ULONG CFolderViewImplFolder::Release()
     }
     return cRef;
 }
+
 
 void CFolderViewImplFolder::DoDrop(list<TCHAR*> files, LPCITEMIDLIST subfolder)
 {
@@ -696,7 +698,15 @@ HRESULT CFolderViewImplFolder::CreateViewObject(HWND hwnd, REFIID riid, void **p
 		pMyDropTarget->AddRef();
 		hr = pMyDropTarget->QueryInterface(IID_IDropTarget, ppv);
 		pMyDropTarget->Release();
-		//hr = S_OK;
+	}
+	else if (riid == IID_IDropSource)
+	{
+		IUnknown *pFolder;
+		this->QueryInterface(IID_IUnknown, (void**)&pFolder);
+		MyDropSource *pMyDropSource = new MyDropSource(pFolder);
+		pMyDropSource->AddRef();
+		hr = pMyDropSource->QueryInterface(IID_IDropSource, ppv);
+		pMyDropSource->Release();
 	}
     return hr;
 }
@@ -1500,8 +1510,45 @@ public:
     }
 
     // IShellFolderViewCB
-    IFACEMETHODIMP MessageSFVCB(UINT /* uMsg */, WPARAM /* wParam */, LPARAM /* lParam */)
-        { return E_NOTIMPL; }
+    IFACEMETHODIMP MessageSFVCB(UINT  uMsg, WPARAM /* wParam */, LPARAM  lParam )
+    {
+		char buf[12];
+		itoa(uMsg, buf, 10);
+		DataProvider dataProvider;
+		dataProvider.logInfo(buf);
+		switch (uMsg)
+		{
+			case SFVM_DIDDRAGDROP:
+			{
+				return E_NOTIMPL;
+			}
+			case WM_MOUSEMOVE:
+			{
+				return E_NOTIMPL;
+			}
+
+			case WM_LBUTTONUP:
+			{
+				return E_NOTIMPL;
+			}
+			case WM_DROPFILES:
+			{
+				return E_NOTIMPL;
+			}
+			case WM_NOTIFY:
+			{
+				switch (((LPNMHDR)lParam)->code)
+				{
+					case LVN_BEGINRDRAG:
+					{
+						return E_NOTIMPL;
+					}
+				}
+				LPNMLISTVIEW pnmv = (LPNMLISTVIEW)lParam;
+			}
+		}
+		return E_NOTIMPL;
+	}
 
     // IFolderViewSettings
     IFACEMETHODIMP GetColumnPropertyList(REFIID /* riid */, void **ppv)
