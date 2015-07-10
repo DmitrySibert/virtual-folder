@@ -1,5 +1,6 @@
 #include <atlbase.h>
 #include "IDropHandler.h"
+#include <Shobjidl.h>
 //#include "Utils.h"
 
 class MyDropTarget : public IDropTarget
@@ -94,6 +95,27 @@ public:
 				files.push_back(szFileDropped);
 				bool t = true;
 			}
+		} 
+		else
+		{
+			IShellItemArray *psia;
+			hr = SHCreateShellItemArrayFromDataObject(pDataObj, IID_PPV_ARGS(&psia));
+			IShellItem *psi;
+			HRESULT hr = psia->GetItemAt(0, &psi);
+			if (SUCCEEDED(hr))
+			{
+				PWSTR pszDisplayName;
+				hr = psi->GetDisplayName(SIGDN_NORMALDISPLAY, &pszDisplayName);
+				PIDLIST_ABSOLUTE pidl;
+				hr = SHGetIDListFromObject(psi, &pidl);
+				wchar_t *pszThisFolder1 = new wchar_t[MAX_PATH];
+				SHGetNameFromIDList(pidl, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder1);
+				IShellItem *psi_parent;
+				hr = psi->GetParent(&psi_parent);
+				hr = psi_parent->GetDisplayName(SIGDN_NORMALDISPLAY, &pszDisplayName);
+				int r = 10;
+			}
+			int k = 10;
 		}
 		ReleaseStgMedium(&stgmed);
 		IDropHandler *pDropHandler;

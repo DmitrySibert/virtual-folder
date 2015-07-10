@@ -827,7 +827,11 @@ HRESULT CFolderViewImplFolder::GetUIObjectOf(HWND hwnd, UINT cidl, PCUITEMID_CHI
                 hr = AssocCreateForClasses(rgAssocItem, ARRAYSIZE(rgAssocItem), riid, ppv);
             }
         }
-    }
+	}
+	else if (riid == IID_IDataObject)
+	{
+		hr = SHCreateDataObject(m_pidl, cidl, apidl, NULL, riid, ppv);
+	}
     else
     {
         hr = E_NOINTERFACE;
