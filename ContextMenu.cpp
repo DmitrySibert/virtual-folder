@@ -15,6 +15,7 @@
 #include <new>  // std::nothrow
 #include "DataProvider.h"
 #define MENUVERB_DISPLAY     0
+#define MENUVERB_DELETE      1
 
 // The "terminator" ICIVERBTOIDMAP structure is {NULL, NULL, (UINT)-1,}
 typedef struct
@@ -27,8 +28,9 @@ typedef struct
 
 const ICIVERBTOIDMAP c_FolderViewImplContextMenuIDMap[] =
 {
-    { L"display",    "display",   MENUVERB_DISPLAY, 0, },
-    { NULL,          NULL,        (UINT)-1,         0, }
+    { L"display",    "display",   MENUVERB_DISPLAY,  0, },
+	{ L"delete",     "delete",    MENUVERB_DELETE,   0, },
+    { NULL,          NULL,       (UINT)-1,           0, }
 };
 
 
@@ -116,10 +118,12 @@ HRESULT CFolderViewImplContextMenu::QueryContextMenu(HMENU hmenu, UINT indexMenu
     WCHAR szMenuItem[80];
     LoadString(g_hInst, IDS_DISPLAY, szMenuItem, ARRAYSIZE(szMenuItem));
     InsertMenu(hmenu, indexMenu++, MF_BYPOSITION, idCmdFirst + MENUVERB_DISPLAY, szMenuItem);
+	LoadString(g_hInst, IDS_DELETE, szMenuItem, ARRAYSIZE(szMenuItem));
+	InsertMenu(hmenu, indexMenu++, MF_BYPOSITION, idCmdFirst + MENUVERB_DELETE, szMenuItem);
     // other verbs could go here...
 
     // indicate that we added one verb.
-    return MAKE_HRESULT(SEVERITY_SUCCESS, 0, (USHORT)(1));
+    return MAKE_HRESULT(SEVERITY_SUCCESS, 0, (USHORT)(2));
 }
 
 const ICIVERBTOIDMAP* _CmdIDToMap(UINT_PTR idCmd, BOOL fUnicode, const ICIVERBTOIDMAP* pmap)
@@ -207,18 +211,41 @@ HRESULT CFolderViewImplContextMenu::InvokeCommand(LPCMINVOKECOMMANDINFO pici)
     HRESULT hr = E_INVALIDARG;
     UINT uID;
     // Is this command for us?
-    if (SUCCEEDED(_MapICIVerbToCmdID(pici, c_FolderViewImplContextMenuIDMap, &uID)) && uID == MENUVERB_DISPLAY && _pdtobj)
-    {
-        IShellItemArray *psia;
-        hr = SHCreateShellItemArrayFromDataObject(_pdtobj, IID_PPV_ARGS(&psia));
-        if (SUCCEEDED(hr))
-        {
-            hr = DisplayItem(psia, pici->hwnd);
-			DataProvider dataProvider;
-			dataProvider.runFile("name");
-            psia->Release();
-        }
-    }
+	if (SUCCEEDED(_MapICIVerbToCmdID(pici, c_FolderViewImplContextMenuIDMap, &uID)) && _pdtobj)
+	{
+		switch (uID)
+		{
+			case MENUVERB_DISPLAY:
+			{
+				IShellItemArray *psia;
+				hr = SHCreateShellItemArrayFromDataObject(_pdtobj, IID_PPV_ARGS(&psia));
+				if (SUCCEEDED(hr))
+				{
+					hr = DisplayItem(psia, pici->hwnd);
+					DataProvider dataProvider;
+					dataProvider.logInfo("Запуск файла");
+					psia->Release();
+				}
+				break;
+			}
+			case MENUVERB_DELETE:
+			{
+				IShellItemArray *psia;
+				hr = SHCreateShellItemArrayFromDataObject(_pdtobj, IID_PPV_ARGS(&psia));
+				if (SUCCEEDED(hr))
+				{
+					int dlgRes = MessageBox(NULL, L"Really delete?", L"Deleting!", MB_OKCANCEL);
+					if (dlgRes == IDOK) {
+						hr = DisplayItem(psia, pici->hwnd);
+						DataProvider dataProvider;
+						dataProvider.logInfo("Удаление файла");
+					}
+					psia->Release();
+				}
+				break;
+			}
+		}
+	}
     return hr;
 }
 

@@ -732,6 +732,8 @@ HRESULT CFolderViewImplFolder::GetAttributesOf(UINT cidl, PCUITEMID_CHILD_ARRAY 
                 {
                     dwAttribs |= SFGAO_FOLDER;
 					dwAttribs |= SFGAO_DROPTARGET;
+					dwAttribs |= SFGAO_CANRENAME;
+					dwAttribs |= SFGAO_CANDELETE;
                 }
                 if (nLevel < g_nMaxLevel)
                 {
@@ -896,8 +898,8 @@ HRESULT CFolderViewImplFolder::GetDisplayNameOf(PCUITEMID_CHILD pidl, SHGDNF shg
 
 //  Sets the display name of a file object or subfolder, changing
 //  the item identifier in the process.
-HRESULT CFolderViewImplFolder::SetNameOf(HWND /* hwnd */, PCUITEMID_CHILD /* pidl */,
-                                         PCWSTR /* pszName */,  DWORD /* uFlags */, PITEMID_CHILD *ppidlOut)
+HRESULT CFolderViewImplFolder::SetNameOf(HWND hwnd, PCUITEMID_CHILD pidl,
+                                         PCWSTR pszName,  DWORD uFlags, PITEMID_CHILD *ppidlOut)
 {
     HRESULT hr = E_NOTIMPL;
     *ppidlOut = NULL;
@@ -1516,41 +1518,6 @@ public:
     // IShellFolderViewCB
     IFACEMETHODIMP MessageSFVCB(UINT  uMsg, WPARAM /* wParam */, LPARAM  lParam )
     {
-		char buf[12];
-		itoa(uMsg, buf, 10);
-		DataProvider dataProvider;
-		dataProvider.logInfo(buf);
-		switch (uMsg)
-		{
-			case SFVM_DIDDRAGDROP:
-			{
-				return E_NOTIMPL;
-			}
-			case WM_MOUSEMOVE:
-			{
-				return E_NOTIMPL;
-			}
-
-			case WM_LBUTTONUP:
-			{
-				return E_NOTIMPL;
-			}
-			case WM_DROPFILES:
-			{
-				return E_NOTIMPL;
-			}
-			case WM_NOTIFY:
-			{
-				switch (((LPNMHDR)lParam)->code)
-				{
-					case LVN_BEGINRDRAG:
-					{
-						return E_NOTIMPL;
-					}
-				}
-				LPNMLISTVIEW pnmv = (LPNMLISTVIEW)lParam;
-			}
-		}
 		return E_NOTIMPL;
 	}
 

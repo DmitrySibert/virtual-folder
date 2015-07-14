@@ -927,6 +927,7 @@
 #define IDS_FOLDER_TITLE                144
 #define VK_SCROLL                       0x91
 #define LANG_SCOTTISH_GAELIC            0x91
+#define IDS_DELETE                      145
 #define VK_OEM_NEC_EQUAL                0x92
 #define VK_OEM_FJ_JISHO                 0x92
 #define LANG_CENTRAL_KURDISH            0x92

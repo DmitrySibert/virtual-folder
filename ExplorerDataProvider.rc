@@ -104,6 +104,7 @@ END
 STRINGTABLE
 BEGIN
     IDS_FOLDER_TITLE        "SharedFolder"
+    IDS_DELETE              "Delete"
 END
 
 #endif    // English (United States) resources
