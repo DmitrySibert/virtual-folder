@@ -17,7 +17,8 @@ const FVCOMMANDITEM CFolderViewCommandProvider::c_FVTaskSettings[] =
 const FVCOMMANDITEM CFolderViewCommandProvider::c_FVTasks[] =
 {
     // Icon reference should be replaced by absolute reference to own icon resource.
-    {&GUID_Display,  IDS_DISPLAY,    IDS_DISPLAY_TT,   L"shell32.dll,-42",     0,                  CFolderViewCommandProvider::s_OnDisplay, NULL,             0 },
+    {&GUID_Display,  IDS_DISPLAY,    IDS_DISPLAY_TT,   L"shell32.dll,-42",     0,                  CFolderViewCommandProvider::s_OnDisplay,             NULL,                          0 },
+	{&GUID_New_folder, IDS_NEW_FOLDER, IDS_NEW_FOLDER_TT, L"shell32.dll,-42", 0, CFolderViewCommandProvider::s_OnNewFolder, NULL, 0 },
     {&GUID_Settings, IDS_SETTINGS,   IDS_SETTINGS_TT,  L"shell32.dll,-16710",  ECF_HASSUBCOMMANDS, NULL,                                    c_FVTaskSettings, ARRAYSIZE(c_FVTaskSettings)}
 };
 
@@ -37,6 +38,14 @@ IFACEMETHODIMP CFolderViewCommandProvider::GetCommands(IUnknown * /* punkSite */
 HRESULT CFolderViewCommandProvider::s_OnDisplay(IShellItemArray *psiItemArray, IUnknown * /* pv */)
 {
     return DisplayItem(psiItemArray, NULL);
+}
+
+HRESULT CFolderViewCommandProvider::s_OnNewFolder(IShellItemArray * /* psiItemArray */, IUnknown * /* pv */)
+{
+	DataProvider dataProvider;
+	dataProvider.logInfo("Create new folder");
+	//SendMessage(pici->hwnd, 0x111, 0x7103, 0);
+	return S_OK;
 }
 
 HRESULT CFolderViewCommandProvider::s_OnSetting1(IShellItemArray * /* psiItemArray */, IUnknown * /* pv */)

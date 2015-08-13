@@ -14,6 +14,7 @@
 #include <propkey.h>
 #include <shlwapi.h>
 #include <strsafe.h>
+#include "DataProvider.h"
 
 #include "resource.h"
 
@@ -44,7 +45,8 @@ DEFINE_GUID(GUID_Setting1, 0x3f6fa710, 0x63a8, 0x4843, 0x92, 0xce, 0xf3, 0x21, 0
 DEFINE_GUID(GUID_Setting2, 0x43077c60, 0x29c, 0x4e1e, 0x9c, 0xf6, 0x9c, 0x38, 0xb9, 0x51, 0x23, 0x42);
 // {B8F3F98F-DDB6-48b3-BF93-81D2A791BFF9}
 DEFINE_GUID(GUID_Setting3, 0xb8f3f98f, 0xddb6, 0x48b3, 0xbf, 0x93, 0x81, 0xd2, 0xa7, 0x91, 0xbf, 0xf9);
-
+// {F2930723-DA4F-4CDE-B338-186CF99CE988}
+DEFINE_GUID(GUID_New_folder,   0xf2930723, 0xda4f, 0x4cde, 0xb3, 0x38, 0x18, 0x6c, 0xf9, 0x9c, 0xe9, 0x88);
 
 class CFolderViewCommandProvider : public IExplorerCommandProvider
 {
@@ -85,6 +87,7 @@ private:
     static HRESULT s_OnSetting1(IShellItemArray *psiItemArray, IUnknown *pv);
     static HRESULT s_OnSetting2(IShellItemArray *psiItemArray, IUnknown *pv);
     static HRESULT s_OnSetting3(IShellItemArray *psiItemArray, IUnknown *pv);
+	static HRESULT s_OnNewFolder(IShellItemArray *psiItemArray, IUnknown *pv);
 
 private:
     static const FVCOMMANDITEM c_FVTaskSettings[];

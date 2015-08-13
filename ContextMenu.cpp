@@ -14,8 +14,8 @@
 #include "resource.h"
 #include <new>  // std::nothrow
 #include "DataProvider.h"
-#define MENUVERB_DISPLAY     0
-#define MENUVERB_DELETE      1
+#define MENUVERB_DISPLAY         0
+#define MENUVERB_DELETE          1
 
 // The "terminator" ICIVERBTOIDMAP structure is {NULL, NULL, (UINT)-1,}
 typedef struct
@@ -223,7 +223,7 @@ HRESULT CFolderViewImplContextMenu::InvokeCommand(LPCMINVOKECOMMANDINFO pici)
 				{
 					hr = DisplayItem(psia, pici->hwnd);
 					DataProvider dataProvider;
-					dataProvider.logInfo("Запуск файла");
+					dataProvider.logInfo("Run file");
 					psia->Release();
 				}
 				break;
@@ -238,7 +238,8 @@ HRESULT CFolderViewImplContextMenu::InvokeCommand(LPCMINVOKECOMMANDINFO pici)
 					if (dlgRes == IDOK) {
 						hr = DisplayItem(psia, pici->hwnd);
 						DataProvider dataProvider;
-						dataProvider.logInfo("Удаление файла");
+						dataProvider.logInfo("Delete file");
+						SendMessage(pici->hwnd, 0x111, 0x7103, 0);
 					}
 					psia->Release();
 				}
