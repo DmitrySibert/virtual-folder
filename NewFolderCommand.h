@@ -2,6 +2,7 @@
 #include "fvcommands.h"
 #include "CFolderViewImplFolder.h"
 #include "DataProvider.h"
+#include "CFolderViewCommand.h"
 
 class NewFolderCommand :
 	public CFolderViewCommand

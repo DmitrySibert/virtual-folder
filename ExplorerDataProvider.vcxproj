@@ -218,6 +218,8 @@ copy $(ProjectDir)external\dlls $(OutDir)</Command>
     <ClCompile Include="ContentMessage.cpp" />
     <ClCompile Include="ContextMenu.cpp" />
     <ClCompile Include="DataProvider.cpp" />
+    <ClCompile Include="CFolderViewCommand.cpp" />
+    <ClCompile Include="DisplayCommand.cpp" />
     <ClCompile Include="NewFolderCommand.cpp" />
     <ClCompile Include="Dll.cpp" />
     <ClCompile Include="DropFilesMessage.cpp" />
@@ -234,6 +236,8 @@ copy $(ProjectDir)external\dlls $(OutDir)</Command>
     <ClInclude Include="BaseMessage.h" />
     <ClInclude Include="Category.h" />
     <ClInclude Include="CFolderViewImplFolder.h" />
+    <ClInclude Include="CFolderViewCommand.h" />
+    <ClInclude Include="DisplayCommand.h" />
     <ClInclude Include="NewFolderCommand.h" />
     <ClInclude Include="DropFilesMessage.h" />
     <ClInclude Include="IDropHandler.h" />
