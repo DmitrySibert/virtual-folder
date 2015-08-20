@@ -15,14 +15,21 @@
 #include <shlwapi.h>
 #include <strsafe.h>
 #include "DataProvider.h"
+#include "CFolderViewImplFolder.h"
 
 #include "resource.h"
 
 typedef HRESULT (*PFN_ExplorerCommandExecute)(IShellItemArray *psiItemArray, IUnknown* pv);
+typedef unsigned short int COM_ID;
+
+//define command identifiers
+#define NEW_FOLDER_COM 1001
+#define DISPLAY_COM 1002
 
 struct FVCOMMANDITEM
 {
     const GUID* pguidCanonicalName;
+	COM_ID commandId;
     DWORD dwTitleID;
     DWORD dwToolTipID;
     PCWSTR pszIcon;
@@ -78,7 +85,7 @@ public:
     IFACEMETHODIMP GetCommand(REFGUID /* rguidCommandId */, REFIID /* riid */, void **ppv)
         { *ppv = NULL; return E_NOTIMPL; }
 
-    CFolderViewCommandProvider() : _cRef(1)
+	CFolderViewCommandProvider(CFolderViewImplFolder *pFolderView) : _cRef(1), m_pFolderView(pFolderView)
     {
     }
 
@@ -90,7 +97,8 @@ private:
 	static HRESULT s_OnNewFolder(IShellItemArray *psiItemArray, IUnknown *pv);
 
 private:
-    static const FVCOMMANDITEM c_FVTaskSettings[];
+	CFolderViewImplFolder *m_pFolderView;
+    /*static const FVCOMMANDITEM c_FVTaskSettings[];*/
     static const FVCOMMANDITEM c_FVTasks[];
     long _cRef;
 };
@@ -127,7 +135,8 @@ public:
     IFACEMETHODIMP Clone(IEnumExplorerCommand **ppenum)
         { *ppenum = NULL; return E_NOTIMPL; }
 
-    CFolderViewCommandEnumerator(const FVCOMMANDITEM *apfvc, UINT uCommands) : _cRef(1), _uCurrent(0), _uCommands(uCommands), _apfvci(apfvc)
+	CFolderViewCommandEnumerator(const FVCOMMANDITEM *apfvc, UINT uCommands, CFolderViewImplFolder *pFolderView)
+		: _cRef(1), _uCurrent(0), _uCommands(uCommands), _apfvci(apfvc), m_pFolderView(pFolderView)
     {
     }
 
@@ -137,6 +146,7 @@ private:
     ~CFolderViewCommandEnumerator(){}
 
 private:
+	CFolderViewImplFolder *m_pFolderView;
     long _cRef;
     ULONG _uCurrent;
     ULONG _uCommands;
@@ -144,47 +154,3 @@ private:
 };
 
 
-class CFolderViewCommand : public IExplorerCommand
-{
-public:
-    // IUnknown
-    IFACEMETHODIMP QueryInterface(REFIID riid, void **ppv)
-    {
-        static const QITAB qit[] =
-        {
-            QITABENT(CFolderViewCommand, IExplorerCommand),
-            { 0 },
-        };
-        return QISearch(this, qit, riid, ppv);
-    }
-
-    IFACEMETHODIMP_(ULONG) AddRef() { return InterlockedIncrement(&_cRef); }
-    IFACEMETHODIMP_(ULONG) Release()
-    {
-        long cRef = InterlockedDecrement(&_cRef);
-        if (!cRef)
-        {
-            delete this;
-        }
-        return cRef;
-    }
-
-    // IExplorerCommand
-    IFACEMETHODIMP GetTitle(IShellItemArray *psiItemArray, LPWSTR *ppszName);
-    IFACEMETHODIMP GetIcon(IShellItemArray *psiItemArray, LPWSTR *ppszIcon);
-    IFACEMETHODIMP GetToolTip(IShellItemArray *psiItemArray, LPWSTR *ppszInfotip);
-    IFACEMETHODIMP GetCanonicalName(GUID *pguidCommandName);
-    IFACEMETHODIMP GetState(IShellItemArray *psiItemArray, BOOL fOkToBeSlow, EXPCMDSTATE *pCmdState);
-    IFACEMETHODIMP Invoke(IShellItemArray *psiItemArray, IBindCtx *pbc);
-    IFACEMETHODIMP GetFlags(EXPCMDFLAGS *pFlags);
-    IFACEMETHODIMP EnumSubCommands(IEnumExplorerCommand **ppEnum);
-
-    CFolderViewCommand(FVCOMMANDITEM *pfvci) : _cRef(1), _pfvci(pfvci)
-    { }
-
-private:
-    ~CFolderViewCommand() { }
-
-    long _cRef;
-    const FVCOMMANDITEM *_pfvci;
-};
