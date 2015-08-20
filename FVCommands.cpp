@@ -1,6 +1,7 @@
 #include "fvcommands.h"
 #include "utils.h"
 #include <new>  // std::nothrow
+#include "NewFolderCommand.h"
 
 extern HINSTANCE g_hInst;
 
@@ -25,7 +26,7 @@ const FVCOMMANDITEM CFolderViewCommandProvider::c_FVTasks[] =
 IFACEMETHODIMP CFolderViewCommandProvider::GetCommands(IUnknown * /* punkSite */, REFIID riid, void **ppv)
 {
     *ppv = NULL;
-    CFolderViewCommandEnumerator *pFVCommandEnum = new (std::nothrow) CFolderViewCommandEnumerator(c_FVTasks, ARRAYSIZE(c_FVTasks));
+    CFolderViewCommandEnumerator *pFVCommandEnum = new (std::nothrow) CFolderViewCommandEnumerator(c_FVTasks, ARRAYSIZE(c_FVTasks), m_pFolderView);
     HRESULT hr = pFVCommandEnum ? S_OK : E_OUTOFMEMORY;
     if (SUCCEEDED(hr))
     {
@@ -83,7 +84,7 @@ HRESULT CFolderViewCommandProvider::s_OnSetting3(IShellItemArray * /* psiItemArr
 
 HRESULT CFolderViewCommandEnumerator::_CreateCommandFromCommandItem(FVCOMMANDITEM *pfvci, IExplorerCommand **ppExplorerCommand)
 {
-    CFolderViewCommand *pCommand = new (std::nothrow) CFolderViewCommand(pfvci);
+    CFolderViewCommand *pCommand = new (std::nothrow) NewFolderCommand(pfvci, m_pFolderView);
     HRESULT hr = pCommand ? S_OK : E_OUTOFMEMORY;
     if (SUCCEEDED(hr))
     {
@@ -240,12 +241,13 @@ IFACEMETHODIMP CFolderViewCommand::Invoke(IShellItemArray *psiItemArray, IBindCt
 
 IFACEMETHODIMP CFolderViewCommand::EnumSubCommands(IEnumExplorerCommand **ppEnum)
 {
-    CFolderViewCommandEnumerator *pFVCommandEnum = new (std::nothrow) CFolderViewCommandEnumerator(_pfvci->pFVCIChildren, _pfvci->uChildCommands);
+	return E_NOTIMPL;
+    /*CFolderViewCommandEnumerator *pFVCommandEnum = new (std::nothrow) CFolderViewCommandEnumerator(_pfvci->pFVCIChildren, _pfvci->uChildCommands);
     HRESULT hr = pFVCommandEnum ? S_OK : E_OUTOFMEMORY;
     if (SUCCEEDED(hr))
     {
         hr = pFVCommandEnum->QueryInterface(IID_PPV_ARGS(ppEnum));
         pFVCommandEnum->Release();
     }
-    return hr;
+    return hr;*/
 }

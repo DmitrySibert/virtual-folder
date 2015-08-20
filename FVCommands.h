@@ -15,6 +15,7 @@
 #include <shlwapi.h>
 #include <strsafe.h>
 #include "DataProvider.h"
+#include "CFolderViewImplFolder.h"
 
 #include "resource.h"
 
@@ -78,7 +79,7 @@ public:
     IFACEMETHODIMP GetCommand(REFGUID /* rguidCommandId */, REFIID /* riid */, void **ppv)
         { *ppv = NULL; return E_NOTIMPL; }
 
-    CFolderViewCommandProvider() : _cRef(1)
+	CFolderViewCommandProvider(CFolderViewImplFolder *pFolderView) : _cRef(1), m_pFolderView(pFolderView)
     {
     }
 
@@ -90,6 +91,7 @@ private:
 	static HRESULT s_OnNewFolder(IShellItemArray *psiItemArray, IUnknown *pv);
 
 private:
+	CFolderViewImplFolder *m_pFolderView;
     static const FVCOMMANDITEM c_FVTaskSettings[];
     static const FVCOMMANDITEM c_FVTasks[];
     long _cRef;
@@ -127,7 +129,8 @@ public:
     IFACEMETHODIMP Clone(IEnumExplorerCommand **ppenum)
         { *ppenum = NULL; return E_NOTIMPL; }
 
-    CFolderViewCommandEnumerator(const FVCOMMANDITEM *apfvc, UINT uCommands) : _cRef(1), _uCurrent(0), _uCommands(uCommands), _apfvci(apfvc)
+	CFolderViewCommandEnumerator(const FVCOMMANDITEM *apfvc, UINT uCommands, CFolderViewImplFolder *pFolderView)
+		: _cRef(1), _uCurrent(0), _uCommands(uCommands), _apfvci(apfvc), m_pFolderView(pFolderView)
     {
     }
 
@@ -137,6 +140,7 @@ private:
     ~CFolderViewCommandEnumerator(){}
 
 private:
+	CFolderViewImplFolder *m_pFolderView;
     long _cRef;
     ULONG _uCurrent;
     ULONG _uCommands;
@@ -175,14 +179,14 @@ public:
     IFACEMETHODIMP GetToolTip(IShellItemArray *psiItemArray, LPWSTR *ppszInfotip);
     IFACEMETHODIMP GetCanonicalName(GUID *pguidCommandName);
     IFACEMETHODIMP GetState(IShellItemArray *psiItemArray, BOOL fOkToBeSlow, EXPCMDSTATE *pCmdState);
-    IFACEMETHODIMP Invoke(IShellItemArray *psiItemArray, IBindCtx *pbc);
+    virtual IFACEMETHODIMP Invoke(IShellItemArray *psiItemArray, IBindCtx *pbc);
     IFACEMETHODIMP GetFlags(EXPCMDFLAGS *pFlags);
     IFACEMETHODIMP EnumSubCommands(IEnumExplorerCommand **ppEnum);
 
     CFolderViewCommand(FVCOMMANDITEM *pfvci) : _cRef(1), _pfvci(pfvci)
     { }
 
-private:
+protected:
     ~CFolderViewCommand() { }
 
     long _cRef;
