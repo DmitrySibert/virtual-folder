@@ -104,6 +104,9 @@ END
 STRINGTABLE
 BEGIN
     IDS_FOLDER_TITLE        "SharedFolder"
+    IDS_DELETE              "Delete"
+    IDS_NEW_FOLDER          "New folder"
+    IDS_NEW_FOLDER_TT       "Create new folder"
 END
 
 #endif    // English (United States) resources

@@ -927,10 +927,13 @@
 #define IDS_FOLDER_TITLE                144
 #define VK_SCROLL                       0x91
 #define LANG_SCOTTISH_GAELIC            0x91
+#define IDS_DELETE                      145
 #define VK_OEM_NEC_EQUAL                0x92
 #define VK_OEM_FJ_JISHO                 0x92
 #define LANG_CENTRAL_KURDISH            0x92
+#define IDS_NEW_FOLDER                  146
 #define VK_OEM_FJ_MASSHOU               0x93
+#define IDS_NEW_FOLDER_TT               147
 #define VK_OEM_FJ_TOUROKU               0x94
 #define VK_OEM_FJ_LOYA                  0x95
 #define VK_OEM_FJ_ROYA                  0x96
