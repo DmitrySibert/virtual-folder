@@ -83,28 +83,37 @@ public:
 		FORMATETC fe = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 		HRESULT hr = pDataObj->GetData(&fe, &stgmed);
 		std::list<TCHAR*> files;
+		bool isInsideNse;
 		if (S_OK == hr)
 		{
 			HDROP hDrop = (HDROP)stgmed.hGlobal;
 			UINT nFiles = DragQueryFile(hDrop, (UINT)-1, NULL, 0);
-			for (UINT i = 0; i < nFiles; i++)
+			for (UINT i = 0; i < nFiles; ++i)
 			{
 				UINT nameSize = DragQueryFile(hDrop, i, NULL, 0) + 1;
 				TCHAR *szFileDropped = new TCHAR[nameSize];
 				DragQueryFile(hDrop, i, szFileDropped, nameSize);
 				files.push_back(szFileDropped);
-				bool t = true;
 			}
+			isInsideNse = false;
 		} 
 		else
 		{
 			IShellItemArray *psia;
 			hr = SHCreateShellItemArrayFromDataObject(pDataObj, IID_PPV_ARGS(&psia));
 			IShellItem *psi;
-			HRESULT hr = psia->GetItemAt(0, &psi);
+			DWORD nFiles;
+			psia->GetCount(&nFiles);
 			if (SUCCEEDED(hr))
 			{
-				PWSTR pszDisplayName;
+				for (DWORD i = 0; i < nFiles; ++i)
+				{
+					TCHAR *szFileDropped = new TCHAR[MAX_PATH];
+					HRESULT hr = psia->GetItemAt(i, &psi);
+					psi->GetDisplayName(SIGDN_NORMALDISPLAY, &szFileDropped);
+					files.push_back(szFileDropped);
+				}
+				/*PWSTR pszDisplayName;
 				hr = psi->GetDisplayName(SIGDN_NORMALDISPLAY, &pszDisplayName);
 				PIDLIST_ABSOLUTE pidl;
 				hr = SHGetIDListFromObject(psi, &pidl);
@@ -112,10 +121,9 @@ public:
 				SHGetNameFromIDList(pidl, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder1);
 				IShellItem *psi_parent;
 				hr = psi->GetParent(&psi_parent);
-				hr = psi_parent->GetDisplayName(SIGDN_NORMALDISPLAY, &pszDisplayName);
-				int r = 10;
+				hr = psi_parent->GetDisplayName(SIGDN_NORMALDISPLAY, &pszDisplayName);*/
 			}
-			int k = 10;
+			isInsideNse = true;
 		}
 		ReleaseStgMedium(&stgmed);
 		IDropHandler *pDropHandler;
@@ -124,7 +132,14 @@ public:
 		while(!files.empty())
 		{
 			TCHAR *file = files.back();
-			delete[] file;
+			if (isInsideNse)
+			{
+				CoTaskMemFree(file);
+			} 
+			else 
+			{
+				delete[] file;
+			}
 			files.pop_back();
 		}
 		this->m_pFolder->Release();
