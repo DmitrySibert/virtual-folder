@@ -89,6 +89,7 @@ private:
 	HRESULT _GetColumnDisplayName(PCUITEMID_CHILD pidl, const PROPERTYKEY* pkey, VARIANT* pv, WCHAR* pszRet, UINT cch);
 
 	long                m_cRef;
+	HWND				m_hWnd;
 	int                 m_nLevel;
 	PIDLIST_ABSOLUTE    m_pidl;             // where this folder is in the name space
 	PWSTR               m_rgNames[MAX_OBJS];

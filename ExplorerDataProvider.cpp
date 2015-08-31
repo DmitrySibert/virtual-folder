@@ -146,7 +146,7 @@ HRESULT CFolderViewImplFolder::_OnCreateFolder()
 	char* cFolderPath = GetRefPath(ppidlCurrentFolder);
 	DataProvider dp;
 	dp.logInfo(cFolderPath);
-
+	SendMessage(m_hWnd, 0x111, 0x7103, 0);
 	return S_OK;
 }
 
@@ -563,10 +563,11 @@ HRESULT CFolderViewImplFolder::CompareIDs(LPARAM lParam, PCUIDLIST_RELATIVE pidl
 HRESULT CFolderViewImplFolder::CreateViewObject(HWND hwnd, REFIID riid, void **ppv)
 {
     *ppv = NULL;
-
     HRESULT hr = E_NOINTERFACE;
     if (riid == IID_IShellView)
     {
+		//maintain ref to folder window
+		m_hWnd = hwnd;
         SFV_CREATE csfv = { sizeof(csfv), 0 };
         hr = QueryInterface(IID_PPV_ARGS(&csfv.pshf));
         if (SUCCEEDED(hr))
