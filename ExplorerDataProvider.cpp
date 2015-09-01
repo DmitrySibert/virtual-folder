@@ -43,7 +43,7 @@ typedef struct
 class CFolderViewImplEnumIDList : public IEnumIDList
 {
 public:
-    CFolderViewImplEnumIDList(DWORD grfFlags, int nCurrent, CFolderViewImplFolder *pFolderViewImplShellFolder);
+    CFolderViewImplEnumIDList(DWORD grfFlags, int nCurrent, CFolderViewImplFolder *pFolderViewImplShellFolder, list<FolderElement>::iterator it);
 
     // IUnknown methods
     IFACEMETHODIMP QueryInterface(REFIID riid, void **ppv);
@@ -61,6 +61,7 @@ public:
 private:
     ~CFolderViewImplEnumIDList();
 
+	list<FolderElement>::iterator m_folderItemsIt;
     long m_cRef;
     DWORD m_grfFlags;
     int m_nItem;
@@ -274,7 +275,15 @@ HRESULT CFolderViewImplFolder::EnumObjects(HWND /* hwnd */, DWORD grfFlags, IEnu
     {
 		//Вот тут я должен был передать в констуркутор реализации интерфейса IEnumIDList pidl моего CShellFolder
 		//Последний параметр это текущий экземпляр CShellFolder
-        CFolderViewImplEnumIDList *penum = new (std::nothrow) CFolderViewImplEnumIDList(grfFlags, m_nLevel + 1, this);
+		PIDLIST_ABSOLUTE ppidlCurrentFolder;
+		this->GetCurFolder(&ppidlCurrentFolder);
+		HRESULT hr = S_OK;
+		char* cFolderPath = GetRefPath(ppidlCurrentFolder);
+		DataProvider dataProvider;
+		list<FolderElement> foldersElements = dataProvider.getFoldersContent(cFolderPath);
+		delete[] cFolderPath;
+		list<FolderElement>::iterator it = foldersElements.begin();
+        CFolderViewImplEnumIDList *penum = new (std::nothrow) CFolderViewImplEnumIDList(grfFlags, m_nLevel + 1, this, it);
         hr = penum ? S_OK : E_OUTOFMEMORY;
         if (SUCCEEDED(hr))
         {
@@ -1253,8 +1262,8 @@ HRESULT CFolderViewImplFolder::CreateChildID(PCWSTR pszName, int nLevel, int nSi
 /**
 	@pFolderViewImplShellFolder - указатель на экземпляр CShellFolder, содержимое которой необходимо перечислить
 */
-CFolderViewImplEnumIDList::CFolderViewImplEnumIDList(DWORD grfFlags, int nLevel, CFolderViewImplFolder *pFolderViewImplShellFolder) :
-    m_cRef(1), m_grfFlags(grfFlags), m_nLevel(nLevel), m_nItem(0), m_pFolder(pFolderViewImplShellFolder)
+CFolderViewImplEnumIDList::CFolderViewImplEnumIDList(DWORD grfFlags, int nLevel, CFolderViewImplFolder *pFolderViewImplShellFolder, list<FolderElement>::iterator it) :
+    m_cRef(1), m_grfFlags(grfFlags), m_nLevel(nLevel), m_nItem(0), m_pFolder(pFolderViewImplShellFolder), m_folderItemsIt(it)
 {
     m_pFolder->AddRef();
 }
@@ -1296,34 +1305,21 @@ ULONG CFolderViewImplEnumIDList::Release()
 HRESULT CFolderViewImplEnumIDList::Initialize()
 {
     ZeroMemory(m_aData, sizeof(m_aData));
-	PIDLIST_ABSOLUTE ppidlCurrentFolder;
-	this->m_pFolder->GetCurFolder(&ppidlCurrentFolder);
-	HRESULT hr = S_OK;
-	char* cFolderPath = GetRefPath(ppidlCurrentFolder);
-	DataProvider dataProvider;
-	list<FolderElement> foldersElements = dataProvider.getFoldersContent(cFolderPath);
-	list<FolderElement>::iterator it = foldersElements.begin();
-    for (int i = 0; SUCCEEDED(hr) && i < ARRAYSIZE(m_aData); i++)
+    for (int i = 0; i < ARRAYSIZE(m_aData); i++)
     {
-        //hr = LoadFolderViewImplDisplayString(i, m_aData[i].szName, ARRAYSIZE(m_aData[i].szName));
-        if (SUCCEEDED(hr))
-        {
-            // Just hardcode the values here now.
-			int radix = 10;  //система счисления
-			TCHAR buffer[20]; //результат
-			TCHAR *p;  //указатель на результат
-			p = _itow(this->m_nLevel, buffer, radix);
-			wcscpy(m_aData[i].szName, it->name);
-			wcscat(m_aData[i].szName, p);
-            m_aData[i].nSize      = i;
-            m_aData[i].nSides     = 3;
-            m_aData[i].fIsFolder  = it->isFolder;
-        }
-		it++;
+        // Just hardcode the values here now.
+		int radix = 10;  //система счисления
+		TCHAR buffer[20]; //результат
+		TCHAR *p;  //указатель на результат
+		p = _itow(this->m_nLevel, buffer, radix);
+		wcscpy(m_aData[i].szName, m_folderItemsIt->name);
+		wcscat(m_aData[i].szName, p);
+        m_aData[i].nSize      = i;
+        m_aData[i].nSides     = 3;
+        m_aData[i].fIsFolder  = m_folderItemsIt->isFolder;
+		m_folderItemsIt++;
     }
-	//delete[] contentPath;
-	delete[] cFolderPath;
-    return hr;
+    return S_OK;
 }
 
 // Retrieves the specified number of item identifiers in
