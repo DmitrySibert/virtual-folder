@@ -79,31 +79,14 @@ public:
 
 		*pdwEffect = DROPEFFECT_NONE;
 		DWORD dwDropEffect = _QueryDrop();		
-		STGMEDIUM stgmed;
-		FORMATETC fe = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-		HRESULT hr = pDataObj->GetData(&fe, &stgmed);
+		IShellItemArray *psia;
+		HRESULT hr = SHCreateShellItemArrayFromDataObject(pDataObj, IID_PPV_ARGS(&psia));
+		IShellItem *psi;
+		DWORD nFiles;
 		std::list<TCHAR*> files;
-		bool isInsideNse;
-		if (S_OK == hr)
+		if (SUCCEEDED(hr))
 		{
-			HDROP hDrop = (HDROP)stgmed.hGlobal;
-			UINT nFiles = DragQueryFile(hDrop, (UINT)-1, NULL, 0);
-			for (UINT i = 0; i < nFiles; ++i)
-			{
-				UINT nameSize = DragQueryFile(hDrop, i, NULL, 0) + 1;
-				TCHAR *szFileDropped = new TCHAR[nameSize];
-				DragQueryFile(hDrop, i, szFileDropped, nameSize);
-				files.push_back(szFileDropped);
-			}
-			isInsideNse = false;
-		} 
-		else
-		{
-			IShellItemArray *psia;
-			hr = SHCreateShellItemArrayFromDataObject(pDataObj, IID_PPV_ARGS(&psia));
-			IShellItem *psi;
-			DWORD nFiles;
-			psia->GetCount(&nFiles);
+			hr = psia->GetCount(&nFiles);
 			if (SUCCEEDED(hr))
 			{
 				for (DWORD i = 0; i < nFiles; ++i)
@@ -119,23 +102,14 @@ public:
 					}
 				}
 			}
-			isInsideNse = true;
 		}
-		ReleaseStgMedium(&stgmed);
 		IDropHandler *pDropHandler;
 		this->m_pFolder->QueryInterface(IID_IDropHandler, (void**) &pDropHandler);
 		pDropHandler->DoDrop(files, this->m_subfolder);
 		while(!files.empty())
 		{
 			TCHAR *file = files.back();
-			if (isInsideNse)
-			{
-				CoTaskMemFree(file);
-			} 
-			else 
-			{
-				delete[] file;
-			}
+			CoTaskMemFree(file);
 			files.pop_back();
 		}
 		this->m_pFolder->Release();
