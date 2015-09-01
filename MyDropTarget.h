@@ -108,20 +108,16 @@ public:
 			{
 				for (DWORD i = 0; i < nFiles; ++i)
 				{
-					TCHAR *szFileDropped = new TCHAR[MAX_PATH];
-					HRESULT hr = psia->GetItemAt(i, &psi);
-					psi->GetDisplayName(SIGDN_NORMALDISPLAY, &szFileDropped);
-					files.push_back(szFileDropped);
+					hr = psia->GetItemAt(i, &psi);
+					if (SUCCEEDED(hr))
+					{
+						PIDLIST_ABSOLUTE pidl;
+						hr = SHGetIDListFromObject(psi, &pidl);
+						wchar_t *szFileDropped = new wchar_t[MAX_PATH];
+						SHGetNameFromIDList(pidl, SIGDN_DESKTOPABSOLUTEEDITING, &szFileDropped);
+						files.push_back(szFileDropped);
+					}
 				}
-				/*PWSTR pszDisplayName;
-				hr = psi->GetDisplayName(SIGDN_NORMALDISPLAY, &pszDisplayName);
-				PIDLIST_ABSOLUTE pidl;
-				hr = SHGetIDListFromObject(psi, &pidl);
-				wchar_t *pszThisFolder1 = new wchar_t[MAX_PATH];
-				SHGetNameFromIDList(pidl, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder1);
-				IShellItem *psi_parent;
-				hr = psi->GetParent(&psi_parent);
-				hr = psi_parent->GetDisplayName(SIGDN_NORMALDISPLAY, &pszDisplayName);*/
 			}
 			isInsideNse = true;
 		}
