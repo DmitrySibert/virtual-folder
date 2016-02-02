@@ -220,6 +220,7 @@ copy $(ProjectDir)external\dlls $(OutDir)</Command>
     <ClCompile Include="DataProvider.cpp" />
     <ClCompile Include="CFolderViewCommand.cpp" />
     <ClCompile Include="DisplayCommand.cpp" />
+    <ClCompile Include="MenuSource.h" />
     <ClCompile Include="NewFolderCommand.cpp" />
     <ClCompile Include="Dll.cpp" />
     <ClCompile Include="DropFilesMessage.cpp" />

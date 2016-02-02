@@ -25,6 +25,7 @@
 #include "MyDropSource.h"
 //#include "IDropHandler.h"
 #include "CFolderViewImplFolder.h"
+#include "MenuSource.h"
 
 
 const int g_nMaxLevel = 5;
@@ -314,10 +315,22 @@ HRESULT CFolderViewImplFolder::BindToObject(PCUIDLIST_RELATIVE pidl,
         {
             // Initialize it.
             PITEMID_CHILD pidlFirst = ILCloneFirst(pidl);
+			
             hr = pidlFirst ? S_OK : E_OUTOFMEMORY;
             if (SUCCEEDED(hr))
             {
+				wchar_t *pszThisFolder1 = new wchar_t[MAX_PATH];
+				wchar_t *pszThisFolder2 = new wchar_t[MAX_PATH];
+				wchar_t *pszThisFolder3 = new wchar_t[MAX_PATH];
+				wchar_t *pszThisFolder4 = new wchar_t[MAX_PATH];
+				//Получить местонахождение этой сраной дериктории по сраному пидлу
+				SHGetNameFromIDList(pidlFirst, SIGDN_PARENTRELATIVE, &pszThisFolder1);
+				//Получить местонахождение этой сраной дериктории по сраному пидлу
+				SHGetNameFromIDList(pidlFirst, SIGDN_FILESYSPATH, &pszThisFolder2);
+				SHGetNameFromIDList(m_pidl, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder4);
                 PIDLIST_ABSOLUTE pidlBind = ILCombine(m_pidl, pidlFirst);
+				//Получить местонахождение этой сраной дериктории по сраному пидлу
+				SHGetNameFromIDList(pidlBind, SIGDN_DESKTOPABSOLUTEEDITING, &pszThisFolder3);
                 hr = pidlBind ? S_OK : E_OUTOFMEMORY;
                 if (SUCCEEDED(hr))
                 {
@@ -606,8 +619,15 @@ HRESULT CFolderViewImplFolder::CreateViewObject(HWND hwnd, REFIID riid, void **p
     else if (riid == IID_IContextMenu)
     {
         // This is the background context menu for the folder itself, not the context menu on items within it.
-        DEFCONTEXTMENU dcm = { hwnd, NULL, m_pidl, static_cast<IShellFolder2 *>(this), 0, NULL, NULL, 0, NULL };
-        hr = SHCreateDefaultContextMenu(&dcm, riid, ppv);
+        /*DEFCONTEXTMENU dcm = { hwnd, NULL, m_pidl, static_cast<IShellFolder2 *>(this), 0, NULL, NULL, 0, NULL };
+        hr = SHCreateDefaultContextMenu(&dcm, riid, ppv);*/
+		MyMenu* pCatProvider = new (std::nothrow) MyMenu(this);
+		hr = pCatProvider ? S_OK : E_OUTOFMEMORY;
+		if (SUCCEEDED(hr))
+		{
+			hr = pCatProvider->QueryInterface(riid, ppv);
+			pCatProvider->Release();
+		}
     }
     else if (riid == IID_IExplorerCommandProvider)
     {
