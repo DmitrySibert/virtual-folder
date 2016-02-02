@@ -77,8 +77,7 @@ public:
 	STDMETHOD(Drop)(LPDATAOBJECT pDataObj, DWORD dwKeyState, POINTL /*pt*/, LPDWORD pdwEffect)
 	{
 
-		*pdwEffect = DROPEFFECT_NONE;
-		DWORD dwDropEffect = _QueryDrop();		
+		*pdwEffect = DROPEFFECT_NONE;	
 		IShellItemArray *psia;
 		HRESULT hr = SHCreateShellItemArrayFromDataObject(pDataObj, IID_PPV_ARGS(&psia));
 		IShellItem *psi;
@@ -113,8 +112,6 @@ public:
 			files.pop_back();
 		}
 		this->m_pFolder->Release();
-		if (dwDropEffect == DROPEFFECT_NONE)
-			return S_OK;
 		return S_OK;
 	}
 };
