@@ -31,4 +31,4 @@ void DllAddRef();
 void DllRelease();
 
 
-#define MAX_OBJS    4
+#define MAX_OBJS    3

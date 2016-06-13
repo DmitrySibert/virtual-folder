@@ -16,7 +16,7 @@ protected:
 	virtual void preSerialize(Writer<StringBuffer> &writer) const;
 
 public:
-	OpenFileMessage(const string file, const bool isRequest, const string channelName, const string messageType, const string UUID);
+	OpenFileMessage(const string file, const string messageMapId);
 	~OpenFileMessage();
 };
 

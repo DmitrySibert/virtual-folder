@@ -44,7 +44,8 @@ typedef struct
 class CFolderViewImplEnumIDList : public IEnumIDList
 {
 public:
-    CFolderViewImplEnumIDList(DWORD grfFlags, int nCurrent, CFolderViewImplFolder *pFolderViewImplShellFolder, list<FolderElement>::iterator it);
+    CFolderViewImplEnumIDList(DWORD grfFlags, int nCurrent, CFolderViewImplFolder *pFolderViewImplShellFolder, list<FolderElement> folderElemsList);
+	//CFolderViewImplEnumIDList(DWORD grfFlags, int nCurrent, CFolderViewImplFolder *pFolderViewImplShellFolder, list<FolderElement>::iterator it);
 
     // IUnknown methods
     IFACEMETHODIMP QueryInterface(REFIID riid, void **ppv);
@@ -62,13 +63,15 @@ public:
 private:
     ~CFolderViewImplEnumIDList();
 
-	list<FolderElement>::iterator m_folderItemsIt;
+	list<FolderElement> m_folderElemsList;
+	//list<FolderElement>::iterator m_folderItemsIt;
     long m_cRef;
     DWORD m_grfFlags;
     int m_nItem;
     int m_nLevel;
-    ITEMDATA m_aData[MAX_OBJS];
-
+    ITEMDATA *m_aData;
+	int m_nItemsSize;
+	//ITEMDATA m_aData[MAX_OBJS];
     CFolderViewImplFolder *m_pFolder;
 };
 
@@ -153,7 +156,7 @@ HRESULT CFolderViewImplFolder::_OnCreateFolder()
 }
 
 
-void CFolderViewImplFolder::DoDrop(list<TCHAR*> files, LPCITEMIDLIST subfolder)
+void CFolderViewImplFolder::DoDrop(list<TCHAR*> files, list<bool> isFolderFlags, LPCITEMIDLIST subfolder)
 {
 	list<char*> preparedFiles;
 	for (list<TCHAR*>::const_iterator it = files.begin(); it != files.end(); ++it)
@@ -180,7 +183,7 @@ void CFolderViewImplFolder::DoDrop(list<TCHAR*> files, LPCITEMIDLIST subfolder)
 		strcat(cFolderPath, szSubfolderName);
 	}
 	DataProvider dataProvider;
-	dataProvider.dropFiles(preparedFiles, cFolderPath);
+	dataProvider.dropFiles(preparedFiles, isFolderFlags, cFolderPath);
 	delete[] cFolderPath;
 	for (list<char*>::const_iterator it = preparedFiles.begin(); it != preparedFiles.end(); ++it)
 	{
@@ -284,7 +287,8 @@ HRESULT CFolderViewImplFolder::EnumObjects(HWND /* hwnd */, DWORD grfFlags, IEnu
 		list<FolderElement> foldersElements = dataProvider.getFoldersContent(cFolderPath);
 		delete[] cFolderPath;
 		list<FolderElement>::iterator it = foldersElements.begin();
-        CFolderViewImplEnumIDList *penum = new (std::nothrow) CFolderViewImplEnumIDList(grfFlags, m_nLevel + 1, this, it);
+        CFolderViewImplEnumIDList *penum = new (std::nothrow) CFolderViewImplEnumIDList(grfFlags, m_nLevel + 1, this, foldersElements);
+		//CFolderViewImplEnumIDList *penum = new (std::nothrow) CFolderViewImplEnumIDList(grfFlags, m_nLevel + 1, this, it);
         hr = penum ? S_OK : E_OUTOFMEMORY;
         if (SUCCEEDED(hr))
         {
@@ -1282,14 +1286,17 @@ HRESULT CFolderViewImplFolder::CreateChildID(PCWSTR pszName, int nLevel, int nSi
 /**
 	@pFolderViewImplShellFolder - указатель на экземпл€р CShellFolder, содержимое которой необходимо перечислить
 */
-CFolderViewImplEnumIDList::CFolderViewImplEnumIDList(DWORD grfFlags, int nLevel, CFolderViewImplFolder *pFolderViewImplShellFolder, list<FolderElement>::iterator it) :
-    m_cRef(1), m_grfFlags(grfFlags), m_nLevel(nLevel), m_nItem(0), m_pFolder(pFolderViewImplShellFolder), m_folderItemsIt(it)
+CFolderViewImplEnumIDList::CFolderViewImplEnumIDList(DWORD grfFlags, int nLevel, CFolderViewImplFolder *pFolderViewImplShellFolder, list<FolderElement> folderElemsList) :
+    m_cRef(1), m_grfFlags(grfFlags), m_nLevel(nLevel), m_nItem(0), m_pFolder(pFolderViewImplShellFolder), m_folderElemsList(folderElemsList)
+//CFolderViewImplEnumIDList::CFolderViewImplEnumIDList(DWORD grfFlags, int nLevel, CFolderViewImplFolder *pFolderViewImplShellFolder, list<FolderElement>::iterator it) :
+//	m_cRef(1), m_grfFlags(grfFlags), m_nLevel(nLevel), m_nItem(0), m_pFolder(pFolderViewImplShellFolder), m_folderItemsIt(it)
 {
     m_pFolder->AddRef();
 }
 
 CFolderViewImplEnumIDList::~CFolderViewImplEnumIDList()
 {
+	delete[] m_aData;
     m_pFolder->Release();
 }
 
@@ -1324,21 +1331,40 @@ ULONG CFolderViewImplEnumIDList::Release()
 
 HRESULT CFolderViewImplEnumIDList::Initialize()
 {
-    ZeroMemory(m_aData, sizeof(m_aData));
-    for (int i = 0; i < ARRAYSIZE(m_aData); i++)
-    {
-        // Just hardcode the values here now.
+	m_nItemsSize = m_folderElemsList.size();	
+	m_aData = new ITEMDATA[m_nItemsSize];
+	//ZeroMemory(m_aData, sizeof(ITEMDATA) * m_nItemsSize);
+	int i = 0;
+	for (list<FolderElement>::const_iterator it = m_folderElemsList.begin(); it != m_folderElemsList.end(); ++it)
+	{
+		// Just hardcode the values here now.
 		int radix = 10;  //система счислени€
 		TCHAR buffer[20]; //результат
 		TCHAR *p;  //указатель на результат
 		p = _itow(this->m_nLevel, buffer, radix);
-		wcscpy(m_aData[i].szName, m_folderItemsIt->name);
+		wcscpy(m_aData[i].szName, it->name);
 		wcscat(m_aData[i].szName, p);
-        m_aData[i].nSize      = i;
-        m_aData[i].nSides     = 3;
-        m_aData[i].fIsFolder  = m_folderItemsIt->isFolder;
-		m_folderItemsIt++;
-    }
+		m_aData[i].nLevel = 0;
+		m_aData[i].nSize = i;
+		m_aData[i].nSides = 3;
+		m_aData[i].fIsFolder = it->isFolder;
+		i++;
+	}
+	//ZeroMemory(m_aData, sizeof(m_aData));
+	//for (int i = 0; i < ARRAYSIZE(m_aData); i++)
+	//{
+	//	// Just hardcode the values here now.
+	//	int radix = 10;  //система счислени€
+	//	TCHAR buffer[20]; //результат
+	//	TCHAR *p;  //указатель на результат
+	//	p = _itow(this->m_nLevel, buffer, radix);
+	//	wcscpy(m_aData[i].szName, m_folderItemsIt->name);
+	//	wcscat(m_aData[i].szName, p);
+	//	m_aData[i].nSize = i;
+	//	m_aData[i].nSides = 3;
+	//	m_aData[i].fIsFolder = m_folderItemsIt->isFolder;
+	//	m_folderItemsIt++;
+	//}
     return S_OK;
 }
 
@@ -1356,7 +1382,8 @@ HRESULT CFolderViewImplEnumIDList::Next(ULONG celt, PITEMID_CHILD *rgelt, ULONG 
     if (SUCCEEDED(hr))
     {
         ULONG i = 0;
-        while (SUCCEEDED(hr) && i < celt && m_nItem < ARRAYSIZE(m_aData))
+        while (SUCCEEDED(hr) && i < celt && m_nItem < m_nItemsSize)
+		//while (SUCCEEDED(hr) && i < celt && m_nItem < ARRAYSIZE(m_aData))
         {
             BOOL fSkip = FALSE;
             if (!(m_grfFlags & SHCONTF_STORAGE))

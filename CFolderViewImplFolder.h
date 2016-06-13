@@ -72,7 +72,7 @@ public:
 	HRESULT CreateChildID(PCWSTR pszName, int nLevel, int nSize, int nSides, BOOL fIsFolder, PITEMID_CHILD *ppidl);
 
 	// IDropHandler
-	void DoDrop(std::list<TCHAR*> files, LPCITEMIDLIST subfolder);
+	void DoDrop(list<TCHAR*> files, list<bool> isFolderFlags, LPCITEMIDLIST subfolder);
 	HRESULT _OnCreateFolder();
 	~CFolderViewImplFolder();
 

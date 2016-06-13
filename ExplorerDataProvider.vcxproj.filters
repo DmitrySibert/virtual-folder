@@ -78,6 +78,12 @@
     <ClCompile Include="MenuSource.h">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="CreateFolderMessage.cpp">
+      <Filter>network\message</Filter>
+    </ClCompile>
+    <ClCompile Include="DeleteFilesMessage.cpp">
+      <Filter>network\message</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ExplorerDataProvider.def">
@@ -141,6 +147,12 @@
     </ClInclude>
     <ClInclude Include="DisplayCommand.h">
       <Filter>explorercommand</Filter>
+    </ClInclude>
+    <ClInclude Include="CreateFolderMessage.h">
+      <Filter>network\message</Filter>
+    </ClInclude>
+    <ClInclude Include="DeleteFilesMessage.h">
+      <Filter>network\message</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

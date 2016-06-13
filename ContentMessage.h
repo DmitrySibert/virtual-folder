@@ -14,7 +14,7 @@ protected:
 	virtual void preSerialize(Writer<StringBuffer> &writer) const;
 
 public:
-	ContentMessage(const string path, const bool isRequest, const string channelName, const string messageType, const string UUID);
+	ContentMessage(const string path, const string messageMapId);
 	~ContentMessage();
 };
 

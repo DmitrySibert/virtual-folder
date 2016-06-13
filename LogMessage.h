@@ -16,7 +16,7 @@ protected:
 	virtual void preSerialize(Writer<StringBuffer> &writer) const;
 
 public:
-	LogMessage(const string text, const bool isRequest, const string channelName, const string messageType, const string UUID);
+	LogMessage(const string text, const string messageMapId);
 	~LogMessage();
 };
 

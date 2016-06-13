@@ -83,6 +83,7 @@ public:
 		IShellItem *psi;
 		DWORD nFiles;
 		std::list<TCHAR*> files;
+		std::list<bool> isFolderFlags;
 		if (SUCCEEDED(hr))
 		{
 			hr = psia->GetCount(&nFiles);
@@ -98,13 +99,22 @@ public:
 						wchar_t *szFileDropped = new wchar_t[MAX_PATH];
 						SHGetNameFromIDList(pidl, SIGDN_DESKTOPABSOLUTEEDITING, &szFileDropped);
 						files.push_back(szFileDropped);
+						SHFILEINFOW sfi = { 0 };
+						hr = SHGetFileInfo((LPCTSTR)pidl,
+							-1,
+							&sfi,
+							sizeof(sfi),
+							SHGFI_PIDL | SHGFI_DISPLAYNAME
+						);
+						bool isFolder = sfi.dwAttributes & SFGAO_FOLDER;
+						isFolderFlags.push_back(isFolder);
 					}
 				}
 			}
 		}
 		IDropHandler *pDropHandler;
 		this->m_pFolder->QueryInterface(IID_IDropHandler, (void**) &pDropHandler);
-		pDropHandler->DoDrop(files, this->m_subfolder);
+		pDropHandler->DoDrop(files, isFolderFlags, this->m_subfolder);
 		while(!files.empty())
 		{
 			TCHAR *file = files.back();

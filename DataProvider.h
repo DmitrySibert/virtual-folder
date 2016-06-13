@@ -11,6 +11,8 @@
 #include "LogMessage.h"
 #include "OpenFileMessage.h"
 #include "DropFilesMessage.h"
+#include "CreateFolderMessage.h"
+#include "DeleteFilesMessage.h"
 
 using namespace std;
 
@@ -23,12 +25,14 @@ class DataProvider
 {
 private:
 	string getFoldersContentJson(const char* path);
-	const char* url = "http://localhost:9000/";
+	const char* url = "http://localhost:9909/";
 public:
 	DataProvider();
 	list<FolderElement> getFoldersContent(const char* path);
 	bool runFile(const char* file);
-	void dropFiles(std::list<char*> files, string folder);
+	void dropFiles(std::list<char*> files, list<bool> isFolderFlags, string folder);
+	void deleteFiles(std::list<char*> files, string folder);
+	void createFolder(char* files, string folder);
 	void logInfo(const char* message);
 	~DataProvider();
 private:

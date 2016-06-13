@@ -57,7 +57,7 @@ string DataProvider::doJsonPost(IJsonSerializable& requestBody)
 
 string DataProvider::getFoldersContentJson(const char* path){
 
-	ContentMessage message(path, true, "FolderContent", "Path", "c69fb066-c0f4-11e4-8dfc-aa07a5b093db");
+	ContentMessage message(path, "folderContentId");
 	return this->doJsonPost(message);
 }
 
@@ -76,13 +76,13 @@ list<FolderElement> DataProvider::getFoldersContent(const char* path)
 	Document doc;
 	doc.Parse(foldersContentJson);
 	list<FolderElement> foldersContent;
-	Value& folderContent = doc["FolderContent"];
+	Value& folderContent = doc["folderContent"];
 	for (SizeType i = 0; i < folderContent.Size(); i++)
 	{
 		const Value& folderElementJson = folderContent[i];
 		FolderElement folderElement;
 		folderElement.isFolder = folderElementJson["isFolder"].GetBool();
-		wchar_t* title = charToWChar(folderElementJson["title"].GetString());
+		wchar_t* title = charToWChar(folderElementJson["name"].GetString());
 		folderElement.name = title;
 		foldersContent.push_back(folderElement);
 	}
@@ -92,22 +92,34 @@ list<FolderElement> DataProvider::getFoldersContent(const char* path)
 
 void DataProvider::logInfo(const char* info)
 {
-	LogMessage message(info, true, "Logger", "Log", "c69fb066-c0f4-11e4-8dfc-aa07a5b093db");
+	LogMessage message(info, "loggerId");
 	this->doJsonPost(message);
 }
 
 bool DataProvider::runFile(const char* file)
 {
-	OpenFileMessage message(file, true, "FolderContent", "OpenFile", "c69fb066-c0f4-11e4-8dfc-aa07a5b093db");
+	OpenFileMessage message(file, "runFile");
 	this->doJsonPost(message);
 
 	return true;
 }
 
-void DataProvider::dropFiles(std::list<char*> files, string folder)
+void DataProvider::dropFiles(std::list<char*> files, std::list<bool> isFolderFlags, string folder)
 {
-	DropFilesMessage message(files, folder, true, "FolderContent", "DropFiles", "c69fb066-c0f4-11e4-8dfc-aa07a5b093db");
+	DropFilesMessage message(files, isFolderFlags, folder, "startFilesDeleting");
 	this->doJsonPost(message);
+}
+
+void DataProvider::deleteFiles(std::list<char*> files, string folder)
+{
+	DeleteFilesMessage message(files, folder, "filesUpload");
+	this->doJsonPost(message);
+}
+
+void DataProvider::createFolder(char* files, string folder)
+{
+	CreateFolderMessage msg(files, folder, "filesUpload");
+	this->doJsonPost(msg);
 }
 
 DataProvider::~DataProvider()

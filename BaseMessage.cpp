@@ -2,24 +2,17 @@
 
 using namespace rapidjson;
 
-BaseMessage::BaseMessage(const bool isRequest, const string channelName, const string messageType, const string UUID)
-	:isRequest(isRequest), channelName(channelName), messageType(messageType), UUID(UUID)
+BaseMessage::BaseMessage(const string messageMapId):messageMapId(messageMapId)
 {
 }
 
 void BaseMessage::preSerialize(Writer<StringBuffer> &writer) const
 {	
-	writer.String("IsRequest");
-	writer.Bool(this->isRequest);
-	writer.String("To");
+	writer.String("address");
 	writer.StartObject();
-	writer.String("Name");
-	writer.String(this->channelName.c_str());
+	writer.String("messageMapId");
+	writer.String(this->messageMapId.c_str());
 	writer.EndObject();
-	writer.String("Type");
-	writer.String(this->messageType.c_str());
-	writer.String("ID");
-	writer.String(this->UUID.c_str());
 }
 
 string BaseMessage::serialize() const
